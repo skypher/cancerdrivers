@@ -12,10 +12,12 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
 ## Summary
 
 1. **The simulation does not run at the stated population scale.** The paper states
-   $N\tau=10^5$; `sim_fast.py` resamples every 0.1 yr, which makes $N\tau=N\cdot dt=10^4$
-   (Corollary 3 of the theory note). At the stated $10^5$ the same model gives a 16% lifetime AML
-   risk instead of 0.47%. Halving the time step at fixed $N$ gives 0.15%. The published fit to
-   UK incidence holds only at the code's implicit $N\tau=10^4$.
+   $N\tau=10^5$ (from its refs 38, 39, 41). `sim_fast.py` resamples every 0.1 yr, which makes its
+   $N\tau=2\times10^4$ in the convention of ref 39 (Watson 2020, same group) or $10^4$ in the
+   coalescent convention of refs 38 and 41: 5 to 10 times below the stated value (Corollary 3 of
+   the theory note). At the stated $10^5$ the same model gives a lifetime AML risk of 6.6% (ref-39
+   convention) or 16% (coalescent), against 0.47% observed. Halving the time step at fixed $N$
+   gives 0.15%. The published fit to UK incidence holds only at the code's implicit scale.
 2. **Acquisition ages have an irreducible spread and a scale-dependent offset.** Under the
    exponential-establishment approximation, the reported age $t_e$ differs from the true founding
    time by $-(\log X+\kappa-\log(1+s))/s$, with $X$ the unobservable establishment luck (s.d.
@@ -84,17 +86,24 @@ Details follow.
 
 `sim_fast.select_population` sets $n\leftarrow\mathrm{Poisson}(n\,e^{(F-\bar x)dt})$ with $dt=0.1$
 yr and $N=10^5$. This is a Galton-Watson chain with generation time 0.1 yr: the drift variance per
-cell per year is $1/dt=10$, which in the Methods' birth-death language is a symmetric division
-every $\tau=0.1$ yr, so $N\tau=10^4$ years. The Methods and Discussion state $N\tau=10^5$ and
-$\theta=N\tau\mu\approx1$; the code has $\theta=0.1$.
+cell per year is $1/dt=10$ and a new clone of fitness $s$ survives with probability $\approx2s\,dt$.
+In the birth-death model of ref 39 (Watson et al. 2020, Supplementary Note 2 of bioRxiv 569566:
+self-renewal and differentiation each at rate $1/\tau$ per cell) the variance is $2/\tau$ per year
+and survival $\approx s\tau$, so the code has $\tau=0.2$ yr and $N\tau=2\times10^4$. In the
+phylodynamic (coalescent) units of refs 38 and 41 (effective population size times generation
+time; pairwise coalescence rate $1/(N\,dt)$ per year for the Poisson update) the code has
+$N\tau=10^4$. The Methods and Discussion state $N\tau=10^5$ and $\theta=N\tau\mu\approx1$; the code
+has $N\tau\mu=0.2$ (ref-39 units) or 0.1 (coalescent units).
 
 Lifetime risk to 85 in the C++ port (`sim/amlsim.cpp`; it reproduces the published 943/200,200
 cases, 642/301/0 patterns and PPVs within Monte Carlo error): $N=10^5$, $dt=0.1$: 0.464%;
-$N=5\times10^5$, $dt=0.02$ (same $N\,dt$): 0.536%; $N=10^5$, $dt=0.05$: 0.146%; $N=10^6$, $dt=0.1$
-(the stated $N\tau=10^5$): 16.0%.
+$N=5\times10^5$, $dt=0.02$ (same $N\,dt$): 0.536%; $N=10^5$, $dt=0.05$: 0.146%; $N=5\times10^5$,
+$dt=0.1$ (the stated $N\tau=10^5$ in ref-39 units): 6.6% (20,000 lives); $N=10^6$, $dt=0.1$ (the
+stated value in coalescent units): 16.0% (4,000 lives).
 
 Either the stated parameter is wrong, or the published simulations do not implement it. The
-incidence fit, the pattern fractions and the PPVs of Fig. 5 all come from the $N\tau=10^4$ model.
+incidence fit, the pattern fractions and the PPVs of Fig. 5 all come from the model at the code's
+implicit scale. The dependence on the time step holds under any convention.
 
 ## 2. Acquisition ages
 
@@ -105,9 +114,10 @@ clone size equals one cell (Figure_4.ipynb uses `establishment_time`). Under the
 stochastic model, with the exponential-establishment approximation A1, for a clone of known
 fitness $s$ fitted in its exponential phase and not selected on its trajectory:
 - spread: s.d. of $t_e-t_m$ is $1.28/s$, independent of sequencing depth or sample count;
-- offset: at the code's $N\tau=10^4$ reported ages are too early by
-  $(\log5-\gamma-\log(1+s))/s$ (9.4 years at $s=0.1$, 2.6 at $s=0.3$); at the stated $N\tau=10^5$
-  too late by $(\gamma+\log2+\log(1+s))/s$ (13.7 and 5.1 years).
+- offset: at the code's scale reported ages are too early by $(\log5-\gamma-\log(1+s))/s$ (9.4
+  years at $s=0.1$, 2.6 at $s=0.3$); at the stated $N\tau=10^5$ too late by $(\gamma+\log(1+s))/s$
+  in ref-39 units (6.7 and 2.8 years) or $(\gamma+\log2+\log(1+s))/s$ in coalescent units (13.7
+  and 5.1 years).
 
 Real cases are selected (they are AML cases, observed in a window) and $s$ is estimated, so they do
 not inherit this error law; the simulation tests in §2b and §2b2 show both offset and spread
@@ -115,8 +125,8 @@ changing under that selection.
 
 Applied to the published estimates (`analysis/ages.py`; earliest clone per case, the Fig. 4b
 rule): reported $t_e\le20$ in 32 of 42 fitted cases (32/47 = 68%, the paper's "two thirds").
-Expected number with true founding $\le20$: 22.3 at $N\tau=10^4$, 28.7 at $3\times10^4$, 32.4 at
-$10^5$. Ten of the 42 reported ages are at $t_e\le1.5$, i.e. at the birth constraint.
+Expected number with true founding $\le20$: 22.3 at the code's scale, 30.7 at the stated
+$N\tau=10^5$ in ref-39 units, 32.4 at the stated value in coalescent units. Ten of the 42 reported ages are at $t_e\le1.5$, i.e. at the birth constraint.
 
 ### 2b. The estimator on simulated patients with known truth
 

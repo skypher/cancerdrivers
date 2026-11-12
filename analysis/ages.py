@@ -4,7 +4,7 @@ and the population scale N*tau are accounted for.
 
 Model: an established clone of fitness s founded at t_mut has n(t) ~ X exp(s (t - t_mut)) / (2 s tau)
 cells, X ~ Exp(1).  The paper's fit uses size (exp(s(t-t0))-1)/s against N_inf = 1e5, and reports
-t_e = t0 + log(1+s)/s.  Hence t_mut = t0 + (log X + kappa)/s with kappa = log(N_inf / (2 N tau)).
+t_e = t0 + log(1+s)/s.  Hence t_mut = t0 + (log X + kappa)/s with kappa = log(N_inf s / (q N)).
 Prior on t_mut: uniform on [0, inf) (constant first-driver supply), so the posterior of
 L = log X is its Gumbel-min law truncated to t_mut >= 0.
 Usage: python3 -u ages.py <csv>"""
@@ -54,11 +54,16 @@ for label, sel in (('earliest clone with >=1 driver (Fig. 4b rule)', 'any'),
     n = len(recs)
     print(f"\n== {label}: {n} cases with a fitted clone (paper's denominator for Fig. 4b is 47 cases)")
     print(f"  as reported: t_e <= 20 in {sum(r[2] <= 20 for r in recs)}/{n};  t_e pinned near birth (t_e <= 1.5): {sum(r[2] <= 1.5 for r in recs)}")
-    for Ntau in (1e4, 3e4, 1e5):
-        kappa = math.log(Ninf/(2*Ntau))
+    # kappa = log(N_inf s / (q N)); q ~ s*tau in the convention of ref 39 (Watson 2020, Suppl. Note 2:
+    # self-renewal and differentiation each at rate 1/tau), q ~ 2 s C/N with C the coalescent N_e*g
+    # (refs 38, 41). The code has tau = 2 dt (ref 39 convention), C = N dt.
+    for label2, kappa in (('code (ref-39 Ntau = 2e4, coalescent 1e4)', math.log(5.0)),
+                          ('stated Ntau = 1e5, ref-39 convention', 0.0),
+                          ('stated Ntau = 1e5, coalescent convention', math.log(0.5))):
+        Ntau = label2
         e20 = sum(p_le(20, r[3], r[1], kappa) for r in recs)
         shift = sum(mean_tmut(r[3], r[1], kappa) - r[2] for r in recs)/n
-        print(f"  N*tau = {Ntau:.0e} (kappa = {kappa:+.3f}): expected number with true t_mut <= 20: {e20:.1f}/{n}; "
+        print(f"  {Ntau} (kappa = {kappa:+.3f}): expected number with true t_mut <= 20: {e20:.1f}/{n}; "
               f"mean (posterior mean t_mut - reported t_e) = {shift:+.1f} yr")
     # spread
     sds = [1.2825/r[1] for r in recs]

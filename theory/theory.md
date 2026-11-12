@@ -81,13 +81,25 @@ that are small compared with $N$ (so $\bar x\approx0$):
 
 These three rates, and the frequency threshold for AML, depend on $N$ and $h$ only through $Nh$
 up to $O(gh)$ corrections. That the model's outputs inherit this is not proved here; the table
-below tests it numerically. Convention for the comparison with the Methods: a cell divides
-symmetrically at rate $1/\tau$ into two stem cells or two differentiated cells with
-probabilities $(1\pm s\tau)/2$, so a clone of $n$ cells has drift variance $n/\tau$ per year. The
-Poisson update has variance $n$ per step, i.e. $n/h$ per year, so the code corresponds to
-$\tau=h=0.1$ yr and $N\tau=10^4$ years, whereas the paper states $N\tau=10^5$. (Under a convention
-with variance $2n/\tau$ per year the code's $N\tau$ would be $2\times10^4$; the conclusion does not
-change.)
+below tests it numerically.
+
+*What $N\tau$ the code corresponds to.* The paper takes $N\tau\approx10^5$ from its refs 38, 39 and
+41 without fixing a convention, and two are in use there:
+- Ref 39 (Watson et al., Science 2020; bioRxiv 569566, Supplementary Note 2) defines the model by
+  per-cell rates: symmetric self-renewal at $\lambda r(1+s/2)$ and symmetric differentiation at
+  $\lambda r(1-s/2)$, with $1/\tau=\lambda r$. The drift variance is $2n/\tau$ per year and a new
+  clone survives with probability $q\approx s\tau$ (fitness $s$ per year). The Poisson update has
+  variance $n/h$ per year and $q\approx2sh$, so the code corresponds to $\tau=2h=0.2$ yr and
+  $N\tau=2\times10^4$. (That paper's text calls $1/\tau$ "the number of symmetric divisions per year",
+  while its rates give $2/\tau$; the value used here is the one fixed by its equations, $c=1$ and
+  $\tilde n=(e^{sT}-1)/s$.)
+- Refs 38 and 41 (Lee-Six et al. 2018, Mitchell et al. 2022) estimate $N\tau$ phylodynamically from
+  coalescence rates, i.e. as effective population size times generation time (50,000-250,000 in
+  adults). For the Poisson update the pairwise coalescence rate is $1/(Nh)$ per year, so in these
+  units the code has $N\tau=Nh=10^4$.
+So the code runs 5 (ref 39) to 10 (refs 38, 41) times below the stated scale. The stated
+$N\tau=10^5$ corresponds to $Nh=5\times10^4$ under ref 39's convention and to $Nh=10^5$ under the
+coalescent one.
 
 *Numerical* (`runs/ndt/`): lifetime AML risk to age 85
 
@@ -96,29 +108,32 @@ change.)
 | $10^5$ | 0.1 | $10^4$ | 0.464% (published setting) |
 | $5\times10^5$ | 0.02 | $10^4$ | 0.536% |
 | $10^5$ | 0.05 | $5\times10^3$ | 0.146% |
-| $10^6$ | 0.1 | $10^5$ | 16.0% |
+| $5\times10^5$ | 0.1 | $5\times10^4$ | 6.6% (stated $N\tau$, ref-39 convention; 20,000 lives) |
+| $10^6$ | 0.1 | $10^5$ | 16.0% (stated $N\tau$, coalescent convention; 4,000 lives) |
 
 At fixed $Nh$ the risk changes by 15% over a fivefold change of $h$ (the residual $O(gh)$
 discretisation effect at the large fitness values of late clones). At the stated $N\tau=10^5$ the
-model gives a 16% lifetime risk, 34 times the observed 0.48%.
+model gives a lifetime risk of 6.6% (ref-39 convention) or 16% (coalescent convention), 14 to 34
+times the observed 0.48%.
 
 ## 2. Acquisition ages
 
-**Proposition 4 (what the fitted establishment time measures; under A1 and $q(s)\approx 2sh$).** Fit the paper's deterministic
+**Proposition 4 (what the fitted establishment time measures; under A1).** Fit the paper's deterministic
 size $S(t)=(e^{s(t-t_0)}-1)/s$ against a population of $N_{\rm inf}=10^5$ to a clone that in
 truth was founded at $t_m$ and grows at rate $s$ relative to the background, with
 $n(t)\approx X e^{s(t-t_m)}/q(s)$ in a population of $N$ cells. Matching the exponential phases
 gives
 $$t_0=t_m-\frac{1}{s}\Big[\log X+\log\frac{s N_{\rm inf}}{q(s)N}\Big]
-\;\approx\;t_m-\frac{1}{s}\Big[\log X+\log\frac{N_{\rm inf}}{2N\tau}\Big],$$
+\;\approx\;t_m-\frac{1}{s}\Big[\log X+\log\frac{N_{\rm inf}}{N\tau}\Big]$$
+with $q(s)\approx s\tau$ in the convention of ref 39 (in the code $\tau=2h$, so $N\tau=2\times10^4$),
 and the reported "establishment time" (deterministic size reaches one cell) is
 $t_e=t_0+\log(1+s)/s$. Since $-\log X$ is Gumbel distributed with mean $\gamma=0.577$ and
 variance $\pi^2/6$:
 $$E[t_e-t_m]=\frac{\gamma-\kappa+\log(1+s)}{s},\qquad \mathrm{sd}(t_e-t_m)=\frac{\pi}{\sqrt6\,s}\approx\frac{1.28}{s},
-\qquad \kappa=\log\frac{N_{\rm inf}}{2N\tau}.$$
+\qquad \kappa=\log\frac{N_{\rm inf}\,s}{q(s)\,N}\approx\log\frac{N_{\rm inf}}{N\tau}.$$
 
-*Proof.* Equate $e^{-st_0}/(sN_{\rm inf})$ with $X e^{-st_m}/(q(s)N)$; use $q(s)\approx 2s\tau$
-(Proposition 2 with $\tau=h$). $\square$
+*Proof.* Equate $e^{-st_0}/(sN_{\rm inf})$ with $X e^{-st_m}/(q(s)N)$; use $q(s)\approx s\tau$
+(Proposition 2: $q\approx2sh$, and $\tau=2h$). $\square$
 
 Consequences.
 - Proposition 4 averages over $X$ for a clone with a given founding time. In samples selected on
@@ -127,10 +142,11 @@ Consequences.
 - For an unselected clone the spread $1.28/s$ does not shrink with more data: it is the
   unobservable luck of the clone's first few divisions (13 years at $s=0.1$/yr). After selection
   on the trajectory both the offset and the spread change, so $1.28/s$ is not a universal error.
-- The offset depends on the population scale. In the code's own model ($N\tau=10^4$, $\kappa=\log 5$)
-  reported ages are on average $(\log 5-\gamma-\log(1+s))/s$ too early: 9.4 years at $s=0.1$,
-  2.6 years at $s=0.3$. At the stated $N\tau=10^5$ ($\kappa=-\log 2$) they are
-  $(\gamma+\log 2+\log(1+s))/s$ too late: 13.7 and 5.1 years.
+- The offset depends on the population scale. In the code's own model ($\kappa=\log 5$) reported
+  ages are on average $(\log 5-\gamma-\log(1+s))/s$ too early: 9.4 years at $s=0.1$, 2.6 years at
+  $s=0.3$. At the stated $N\tau=10^5$ they are too late by $(\gamma+\log(1+s))/s$ under ref 39's
+  convention ($\kappa=0$: 6.7 and 2.8 years) or by $(\gamma+\log2+\log(1+s))/s$ under the coalescent
+  convention ($\kappa=-\log2$: 13.7 and 5.1 years).
 - Posterior of the true founding age given $(s,t_0)$, with constant first-driver supply (uniform
   prior on $t_m\ge0$): $t_m=t_0+(L+\kappa)/s$ with $L=\log X$ truncated to $t_m\ge 0$. For a
   daughter founded inside a parent of fitness $s_p$ the prior is $\propto e^{s_p t_m}$, which turns
