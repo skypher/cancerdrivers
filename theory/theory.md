@@ -369,7 +369,8 @@ and re-tune one other parameter to the observed lifetime risk (`runs/retune/`,
 | stated scale, $U=3.8\times10^{-6}$ | 0.496% | 66/34/0% | 5.4, 39.8, 61.9, 74.2 | 0.19, 0.60, 1.59, 4.12 | 100, 94, 61, 26% |
 | stated scale, $s_1=0.1165$ | 0.486% | 57/43/0% | 5.9, 34.2, 58.8, 72.4 | 0.13, 0.41, 1.15, 3.11 | 100, 98, 82, 39% |
 
-PPV numerators, denominators and two-sided 95% Clopper-Pearson intervals (ages 40/50/60/70):
+PPV numerators, denominators and two-sided 95% Clopper-Pearson intervals, rounded to whole percent
+(ages 40/50/60/70; exact lower ends for 24/24 and 19/19 are 85.75% and 82.35%):
 published 50/56 [78-96%], 217/303 [66-77%], 553/1204 [43-49%], 733/3422 [20-23%]; re-tuned in $U$
 24/24 [86-100%], 133/142 [88-97%], 480/783 [58-65%], 770/2984 [24-27%]; re-tuned in $s_1$ 19/19
 [82-100%], 117/120 [93-99%], 384/470 [78-85%], 665/1725 [36-41%]. With 19-24 qualifiers at 40, the

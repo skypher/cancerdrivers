@@ -24,7 +24,7 @@ job_f9cc4981, gpt-6-pro); verdicts noted per item.
    ($U=3.8\times10^{-6}$, 200,200 lives) it gives 0.50% and approximately preserves the simulated
    incidence shape, the pattern fractions (66/34/0%, published 69/31/0%), the median driver ages (5.4, 39.8, 61.9, 74.2
    against 6.0, 39.1, 61.1, 74.1) and the conditioned fitness ladder; the sweep PPVs change (40-70:
-   24/24, 133/142, 480/783, 770/2984, i.e. 100% [86-100], 94%, 61%, 26%, against 89%, 72%, 46%, 21%). Re-tuning the
+   24/24, 133/142, 480/783, 770/2984, i.e. 100% [85.75-100], 94%, 61%, 26%, against 89%, 72%, 46%, 21%). Re-tuning the
    fitness scale instead ($s_1=0.1165$) also fits incidence but lowers absolute conditioned fitness
    by 21-28% (adjacent ratios approximately similar), gives more branched cases (57/43/0%) and higher PPVs (60: 82%, 70: 39%). So this is
    an internal inconsistency between the stated and the simulated parameters, which matters for the
