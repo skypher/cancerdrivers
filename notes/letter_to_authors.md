@@ -24,8 +24,9 @@ Summary
   before the first sample, appear weakly identified.
 - Code: two possible issues in the inference code, whose effect on the published values we have not
   assessed.
-- No-driver cases: in an illustrative sensitivity analysis the model rarely produces cases with no
-  detected driver, whereas the cohort has 5 of 47.
+- No-driver cases: under an illustrative four-trunk-driver scenario with independent panel misses,
+  the estimated no-detected-trunk-driver rate is low. Its comparison with the cohort's 5 of 47
+  no-panel-driver cases depends on the observation assumptions described in item 4.
 
 Details
 
