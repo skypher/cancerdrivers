@@ -25,7 +25,7 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
 3. **The reported uncertainties are not confidence intervals.** They are the spread of optimiser
    end points over 25 seeds within ±20% of the best negative log-likelihood. On the public data,
    approximate 95% profile-likelihood intervals for reported ages, with the quasi-binomial
-   correction for the measured overdispersion (Pearson dispersion 3.1), have median width 51 years,
+   correction for the measured overdispersion (Pearson dispersion 3.1), have median width 52 years,
    against 7 years for the published ranges; 144 of 156 case clones are wider. These intervals are
    themselves approximate: on simulated data with known truth their fitness intervals cover the
    true fitness for only 68% of single-driver clones (nominal 95%), and for 93%, 91% and 97% of
@@ -34,7 +34,7 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    audit of $t_e$.
 4. **The "first driver by age 20 in two thirds of cases" statement is not supported case by
    case, and the incidence curve predicts it anyway.** In the re-fit, the maximum-likelihood
-   founding of 19 of 42 earliest clones sits on the constraint "founded at or after birth"; for 33
+   founding of 19 of 42 earliest clones sits on the constraint "founded at or after birth"; for 31
    of 42 the approximate 95% interval reaches that constraint. Only 3 of 42 have an interval
    entirely below age 20. Separately, the first-driver age law (Prop. 5) gives 74% by age 20 for a
    woman diagnosed at 72 from UK incidence alone, for any model satisfying its assumptions
@@ -130,6 +130,11 @@ these simulated cases the founder had swept before the first sample, against 11 
 measure mainly the failure on swept founders. Results for the stratum that dominates the real data
 (founder not swept) are in §2b2.
 
+The simulated fits in §2b, §2b2, §2c (coverage) and §3b used refit as it was before the
+2026-11-12 repair. For simulated inputs (variant names m1, m2, ..., no JAK2 or chr4q variants,
+`Upper_freq` 1) the only difference is the former exponent cap, which can matter only for very
+fast clones.
+
 Results (`runs/simfit/eval.txt`):
 - In 874 of 923 cases the first driver of the AML lineage had VAF > 0.4 at the first sample: it
   had swept before sampling. Its trajectory carries little information on its age or fitness (§3).
@@ -145,7 +150,7 @@ Results (`runs/simfit/eval.txt`):
   (0.99-5.39), 3-driver 1.51 (1.02-3.08), 4-driver 1.52 (1.07-2.65). Absolute fitness of a clone
   inside a swept founder is the founder's (unidentified) fitness plus an identified difference,
   so the bias propagates up the ladder.
-- Pearson dispersion on the simulated read counts: 1.20. On the real data: 3.06. Real VAF series
+- Pearson dispersion on the simulated read counts: 1.20. On the real data: 3.14. Real VAF series
   fluctuate about 2.5 times more (in variance) than the model plus binomial sequencing implies.
 
 Caveats: the clean MLE differs from the authors' penalised fit; the real design has fewer samples
@@ -166,7 +171,7 @@ Results (`runs/matched/ns/eval.txt`):
 - Fitted over true fitness, median (IQR): 1-driver 1.20 (0.95-2.00), 2-driver 1.04 (0.96-1.22),
   3-driver 1.02 (0.99-1.07), 4-driver 1.10 (0.98-1.67). Medians fitted/true: 0.165/0.128,
   0.468/0.424, 1.449/1.368, 4.283/3.976.
-- Pearson dispersion 1.14 (real data 3.06).
+- Pearson dispersion 1.14 (real data 3.14).
 
 Mixture at the real proportions (28 not swept, 11 swept among the 39 cases with an observed
 founder variant), using the swept stratum of §2b (Fig. 4b rule): estimator reports "by 20" for
@@ -188,25 +193,41 @@ sweeps far more often than the data show.
 
 ### 2c. Confidence intervals on the real data
 
-`sim/refit.cpp` re-implements the paper's model (Methods eqs. 1-2, the VAF weights of the v16
-code for heterozygous SNVs, homozygous JAK2/9p and TET2/4q, and mCA cell fractions) with a
-binomial likelihood on read counts, censored likelihood for undetected timepoints and Gaussian
-mCA cell fractions. Constraints: $t_0\ge0$, daughter not founded before parent, $0.002\le s\le15$.
-It does not impose the authors' penalty that a daughter be fitter than its parent. Starting points
-include the published estimates. Profile intervals are computed for $s$ and $t_e$ of every clone,
-with the binomial threshold (1.92) and the quasi-binomial threshold $1.92\phi$.
+`sim/refit.cpp` re-implements the core of the paper's model: Methods eqs. 1-2; the VAF weights of
+the v16 `likelihood_clones` in its branch order (a clone containing JAK2 V617F takes the JAK2
+branch, with JAK2 weight 1 only alongside chr9p CN-LOH, and never the chr4q/TET2 branch; otherwise
+chr4q CN-LOH gives weight 1 to TET2 variants; mCAs weight 1; others 1/2); the v16 filter that only
+observations with $0<\text{freq}<$ `Upper_freq` enter (0.4 for C92_034, 1 otherwise); and a binomial
+likelihood on read counts. The Jander code review (2026-11-12) found the earlier weight rule out of
+branch order; no real clone contains both JAK2 V617F and chr4q CN-LOH, so that change alters no
+fit, whereas adding the omitted `Upper_freq` filter changes C92_034.
 
-Results (`runs/refit/full/eval.txt`, 42 cases, 33 controls, 222 clones):
-- Pooled Pearson dispersion of the detected read counts: $\phi=3.06$ (1 under the binomial
+Deliberate differences from the authors' objective: their penalties are omitted (refit has its
+own soft constraints: $t_0\ge0$, daughter not founded before parent, $0.002\le s\le15$; no
+requirement that a daughter be fitter than its parent); undetected timepoints enter as a censored
+$P(K\le2)$ term; mCA cell fractions are Gaussian with the phased-caller s.d. (v16: binomial at
+depth 1800); sample times are exact rather than on a 0.1-yr grid; probabilities are clipped to
+$[10^{-12},1-10^{-12}]$ (v16 returns a fixed penalty at 0 or 1); read depths are the public
+`total_depth` (v16 reads the DCS depth of the all-positions files, under controlled access). The
+reported $t_e$ is where the clone's own deterministic size is one cell; v16's `establishment_time`
+is where its normalised frequency first reaches $10^{-5}$, which is later when other clones are
+large (equal for clones founded while the population is about $10^5$). Clone sizes are normalised
+in log space, with no cap on the exponent. Starting points include the published estimates.
+Profile intervals are computed for $s$ and $t_e$ of every clone, with the binomial threshold
+(1.92) and the quasi-binomial threshold $1.92\phi$.
+
+Results (`runs/refit/full5/eval.txt`, 42 cases, 33 controls, 222 clones; repaired code of
+2026-11-12, replacing `runs/refit/full/`):
+- Pooled Pearson dispersion of the detected read counts: $\phi=3.14$ (1 under the binomial
   model). Year-to-year variation is three times the sampling noise the likelihood assumes. Under
   regular, local conditions this would make binomial intervals too narrow by about $\sqrt{3}$;
   near boundaries and under weak identification the factor is not reliable.
-- Width of the 95% interval for $t_e$: median 51 years (cases) and 53 years (controls), against
+- Width of the 95% interval for $t_e$: median 52 years (cases) and 53 years (controls), against
   published optimiser ranges of 7 and 4.4 years.
-- The age interval reaches the birth constraint ($t_0=0$, within 0.3 yr) for 77 of 156 case
-  clones, and for 33 of the 42 earliest clones; 19 of those 42 have their maximum-likelihood fit
+- The age interval reaches the birth constraint ($t_0=0$, within 0.3 yr) for 74 of 156 case
+  clones, and for 31 of the 42 earliest clones; 19 of those 42 have their maximum-likelihood fit
   on it. (An earlier draft reported 14 of 156 from a flag that could not detect this constraint.)
-  The fitness interval reaches the upper search bound 15/yr for 59 of 156 (fast late clones whose
+  The fitness interval reaches the upper search bound 15/yr for 57 of 156 (fast late clones whose
   growth is only bounded below).
 - Coverage of these intervals on simulated cases with known truth (`runs/coverage/eval.txt`; 150
   cases of the matched stratum of §2b2, the paper's model, nominal 95%, simulated dispersion 1.16):
@@ -218,19 +239,25 @@ Results (`runs/refit/full/eval.txt`, 42 cases, 33 controls, 222 clones):
   than the gap between $t_e$ and the founding time (Prop. 4). This is not a coverage audit of the
   $t_e$ parameter itself. A calibrated interval could differ in centre and shape as well as width,
   so these results do not imply an ordering of widths.
-- Published values lie inside the quasi intervals for 149/156 ages and 131/156 fitnesses. The
+- Flat ridges: rerunning the fit (repaired code, new random restarts) moved the point estimates of
+  16 persons other than C92_034 while their maximum log-likelihood agreed with the previous run to
+  three decimals (two others improved by 0.07 and 0.89, where the old exponent cap had been
+  active). Example: C92_011's fitness 7.5 to 1.5 per year at identical likelihood. Along these
+  directions the likelihood is exactly flat, so the point estimate is wherever the optimiser
+  stops; only the intervals are meaningful.
+- Published values lie inside the quasi intervals for 151/156 ages and 137/156 fitnesses. The
   point estimates are compatible with the data; their stated precision is not.
 - In 15 of 42 cases the published parameters are worse than the maximum-likelihood fit by more
   than the quasi 95% threshold for one parameter (at the best common time shift for the age
-  rounding), in 7 by more than four times that threshold. Their penalties and heuristics (one-
+  rounding), in 6 by more than four times that threshold. Their penalties and heuristics (one-
   sided penalties for undetected timepoints, ordering penalties, manual starting values in
   `Clonal_structure_for_each_sample.csv`) move the fit away from the stated likelihood.
 
 ### 2d. The earliest clone per case (Fig. 4b)
 
-Maximum-likelihood $t_e\le20$ in 26 of 42; 19 of these sit at the constraint $t_0=0$ ($t_e\approx1$).
+Maximum-likelihood $t_e\le20$ in 25 of 42; 19 of these sit at the constraint $t_0=0$ ($t_e\approx1$).
 The whole quasi 95% interval lies below 20 in 3 cases (C92_023, C92_024, C92_086); it reaches
-below 20 in 40. Two of the three (C92_023, C92_024) are founders at VAF about 0.47 in every
+below 20 in 39. Two of the three (C92_023, C92_024) are founders at VAF about 0.47 in every
 sample, whose age is fixed by the birth constraint (§3).
 
 ## 3. Founders swept before sampling

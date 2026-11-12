@@ -40,7 +40,7 @@ static double gammp(double a, double x) {
 static std::vector<double> dfe_table(double p, double sb) {
   const int nq = 1000; std::vector<double> d(nq + 1, -1.0); int prev = 0; double slim = 100.0 * sb;
   for (int i = 0; i <= 1000; i++) {
-    double ts = slim * i / 1000.0; double cdf = gammp(1.0 / p, std::pow(ts / sb, p));
+    double ts = slim * i / 1000.0; double cdf = gammp(1.0 / p, std::pow(ts / sb, p)) / gammp(1.0 / p, std::pow(100.0, p));  // normalised over [0, 100 sb] as in sim_fast
     int cur = (int)std::nearbyint(cdf * nq);
     for (int q = prev; q < cur; q++) d[q] = ts;
     prev = cur; if (cur == nq) { d[cur] = ts; break; }

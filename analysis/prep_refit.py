@@ -66,8 +66,11 @@ for r in rows:
     calls[p].setdefault(nm, {})[s] = r
 
 clones = collections.defaultdict(list)
+upper = {}
 for c in cs:
     clones[c['Sample name']].append([v.strip() for v in c['Variants in clone'].split(',')])
+    if c['Upper_freq'] not in ('', None):
+        upper[c['Sample name']] = float(c['Upper_freq'])   # v16: only 0 < freq < upper_freq enters the likelihood
 
 n_written = 0
 for p in sorted(clones):
@@ -76,6 +79,7 @@ for p in sorted(clones):
     lines = []
     lines.append(f"PERSON {p} {dxage.get(p, float('nan')):.3f}")
     lines.append("TIMES " + " ".join(f"{a:.4f}" for _, a in ts))
+    lines.append(f"UPPER {upper.get(p, 1.0):g}")
     allv = []
     for cl in clones[p]:
         for v in cl:

@@ -29,7 +29,7 @@
 struct Obs { int kind; double a, b; double c0 = 0, c1 = 0, c2 = 0; };  // kind 0 none, 1 binom (k=a, n=b), 2 censored (n=b), 3 gauss (f=a, sd=b)
 struct Var { std::string name; char type; std::vector<Obs> obs; };
 struct Person {
-  std::string id; double dx;
+  std::string id; double dx; double upper = 1.0;
   std::vector<double> t;
   std::vector<Var> vars;
   std::vector<std::vector<int>> clones;      // variant indices
@@ -55,6 +55,7 @@ static bool load(const std::string &path, Person &P) {
   while (std::getline(f, line)) {
     std::stringstream ss(line); std::string tag; ss >> tag;
     if (tag == "PERSON") ss >> P.id >> P.dx;
+    else if (tag == "UPPER") ss >> P.upper;
     else if (tag == "TIMES") { double x; while (ss >> x) P.t.push_back(x); }
     else if (tag == "VAR") {
       Var v; std::string ty; ss >> v.name >> ty; v.type = ty[0];
@@ -93,15 +94,24 @@ static bool load(const std::string &path, Person &P) {
     }
   }
   P.w.assign(C, std::vector<double>(V, 0.0));
+  // literal port of the branch order in v16 likelihood_clones: a clone containing JAK2_p.V617F takes
+  // the JAK2 branch (JAK2 weight 1 only with chr9p_CNLOH) and never the chr4q/TET2 branch; otherwise a
+  // clone containing chr4q_CNLOH gives weight 1 to every variant whose name contains "TET2"; mCAs
+  // (name starting "chr") always weight 1; everything else 1/2.
   for (int c = 0; c < C; c++) {
-    bool has9p = false, has4q = false;
-    for (int v : P.clones[c]) { if (P.vars[v].name == "chr9p_CNLOH") has9p = true; if (P.vars[v].name == "chr4q_CNLOH") has4q = true; }
+    bool hasJ = false, has9p = false, has4q = false;
     for (int v : P.clones[c]) {
       const std::string &n = P.vars[v].name;
-      double wt = 0.5;
-      if (P.vars[v].type == 'M') wt = 1.0;
-      if (n == "JAK2_p.V617F" && has9p) wt = 1.0;
-      if (n.rfind("TET2", 0) == 0 && has4q) wt = 1.0;
+      if (n == "JAK2_p.V617F") hasJ = true;
+      if (n == "chr9p_CNLOH") has9p = true;
+      if (n == "chr4q_CNLOH") has4q = true;
+    }
+    for (int v : P.clones[c]) {
+      const std::string &n = P.vars[v].name;
+      bool mca = n.rfind("chr", 0) == 0;
+      double wt = mca ? 1.0 : 0.5;
+      if (hasJ) { if (has9p && n == "JAK2_p.V617F") wt = 1.0; }
+      else if (has4q) { if (n.find("TET2") != std::string::npos) wt = 1.0; }
       P.w[c][v] = wt;
     }
   }
@@ -126,17 +136,25 @@ struct Model {
   int fixc = -1, fixwhich = -1; double fixval = 0;  // profile: fix log s (0) or t_e (1) of clone fixc
   void preds(const std::vector<double> &x, std::vector<double> &vaf) const {
     vaf.assign((size_t)V * T, 0.0);
-    std::vector<double> size(C);
+    // log size_c = log(expm1(z)/s) computed stably; frequencies by log-sum-exp with log(1e5)
+    std::vector<double> lsz(C);
+    const double l0 = std::log(1e5);
     for (int j = 0; j < T; j++) {
-      double t = P->t[j], tot = 1e5;
+      double t = P->t[j], mx = l0;
       for (int c = 0; c < C; c++) {
         double s = std::exp(x[2 * c]), t0 = x[2 * c + 1];
         double z = s * (t - t0);
-        size[c] = z > 0 ? std::expm1(std::min(z, 700.0)) / s : 0.0;
-        tot += size[c];
+        if (z <= 0) { lsz[c] = -INFINITY; continue; }
+        double lem1 = z > 30 ? z + std::log1p(-std::exp(-z)) : std::log(std::expm1(z));
+        lsz[c] = lem1 - std::log(s);
+        if (lsz[c] > mx) mx = lsz[c];
       }
+      double sum = std::exp(l0 - mx);
+      for (int c = 0; c < C; c++) if (lsz[c] > -INFINITY) sum += std::exp(lsz[c] - mx);
+      double lt = mx + std::log(sum);
       for (int c = 0; c < C; c++) {
-        double fr = size[c] / tot;
+        if (lsz[c] == -INFINITY) continue;
+        double fr = std::exp(lsz[c] - lt);
         if (fr == 0) continue;
         for (int v : P->clones[c]) vaf[(size_t)v * T + j] += P->w[c][v] * fr;
       }
@@ -165,6 +183,7 @@ struct Model {
       const Var &vr = P->vars[v];
       for (int j = 0; j < T; j++) {
         const Obs &o = vr.obs[j]; double p = vaf[(size_t)v * T + j];
+        if ((o.kind == 1 && o.a / o.b >= P->upper) || (o.kind == 3 && o.a >= P->upper)) continue;
         if (o.kind == 1) {
           double pp = std::min(std::max(p, 1e-12), 1 - 1e-12);
           L -= o.c0 + o.a * std::log(pp) + (o.b - o.a) * std::log1p(-pp);
@@ -347,7 +366,7 @@ int main(int argc, char **argv) {
     double c2 = 0, no = 0;
     for (int v = 0; v < M.V; v++) for (int j = 0; j < M.T; j++) {
       const Obs &o = P.vars[v].obs[j];
-      if (o.kind != 1) continue;
+      if (o.kind != 1 || o.a / o.b >= P.upper) continue;
       double p = std::min(std::max(vaf[(size_t)v * M.T + j], 1e-9), 1 - 1e-9);
       double e = o.b * p;
       c2 += (o.a - e) * (o.a - e) / (e * (1 - p)); no += 1;
