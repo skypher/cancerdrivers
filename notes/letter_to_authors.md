@@ -40,10 +40,11 @@ you could clarify. We may well have missed something, and we would welcome a cor
    trajectories use i*dt (differing by up to one step). We have not checked whether either affects
    the published values.
 
-4. Late-evolution and no-driver cases. Applying a version of the paper's late-evolution rule to
-   simulated cases sampled on the cohort's real schedules, the model produces few cases with no
-   detectable driver (an estimated 1.6% even if 30% of drivers, missed independently, lie outside the
-   panel), against 5 of 47 in the cohort. This seems consistent with your suggestion that some AMLs
+4. Late-evolution and no-driver cases. In an illustrative sensitivity analysis that samples
+   simulated AML cases on the cohort's real schedules and treats drivers as missed independently by
+   the panel, the estimated rate of cases with no detected trunk driver is about 1.6% even if 30% of
+   drivers are off-panel; ignoring off-trunk detections makes this an estimated upper envelope for
+   the model's no-panel-driver rate. The cohort has 5 of 47 such cases. This seems consistent with your suggestion that some AMLs
    follow routes outside the panel or the four-hit model, though other explanations remain possible,
    and we wondered whether you had considered adding such a route.
 
