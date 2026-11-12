@@ -75,15 +75,22 @@ job_f9cc4981, gpt-6-pro); verdicts noted per item.
    founders' fitted median was 0.23 against 0.18 true. In the simulation the geometric escalation is
    imposed by the input distributions (scales $s_1r^{k-1}$), so the model's agreement with Fig. 4c
    reflects that assumption.
-7. **The model essentially never produces late evolution** (Pro: holds with qualification). No late
-   case among 928 simulated AML cases (published: 0 of 943): two-sided 95% Clopper-Pearson upper end
-   0.40%. Observed: 10/47, two-sided 95% interval 10.7-35.7%. Since each interval fails on its
-   relevant side with probability at most 2.5%, the ratio of the endpoints, about 27, is a joint 95%
-   lower confidence bound on the ratio of late fractions. This is conditional on comparable
-   classification: the simulation classifies on the complete first-driver lineage trajectory, the
-   real data on sparse samples and a finite panel, where an unobserved initiating driver can produce
-   an apparent late pattern. (A first-moment heuristic for the model's late rate is withdrawn as a
-   quantitative estimate; theory §6.)
+7. **Late evolution: a gap remains under comparable classification, but it is far smaller than first
+   stated** (Pro: holds with qualification; observation-matched check added 2026-11-12, §2e). Against
+   the simulation's own classifier (complete lineage trajectories) the model gives 0 late cases in
+   928, about 27 times below the observed 10/47 (21%, 95% interval 10.7-35.7%). That comparison is not
+   like for like. Applying the real observation process to the simulated cases (each case sampled on
+   a real case's schedule, detection at VAF 0.1%, the paper's rule: no detection, or first detection
+   within 2 years after an earlier negative sample) gives 0 late cases with a complete panel:
+   sampling and detection limits alone do not create late cases. Drivers outside the panel do. With
+   the off-panel rate calibrated to the real data (12-15% of drivers, matching the 40-48% of cases in
+   which the authors inferred a missing driver or found none), the model gives 0.15-0.23% late cases
+   if the pre-leukaemic clone is the first driver's lineage, or 2.6-4.2% under the authors' apparent
+   rule that an earlier clone can be background (their case C92_016, listed "linear/late", was
+   detected 6 years before diagnosis). The gap is then roughly 3- to 8-fold under the authors' rule,
+   not 27-fold. It disappears only if about 30% of drivers are off-panel, which would imply about 70%
+   of cases with a missing driver against 40% observed. Excluding C92_016 the observed fraction is
+   9/47 (19%, 9.1-33.3%).
 8. **The PPV decline with age stands** (Pro: holds). With explicit competing mortality the PPVs are
    close to the published ones (§4); an earlier draft calling the decline an artefact of the age-85
    cut-off was wrong. This shows robustness within the model and scenarios, not calibration of
@@ -307,6 +314,49 @@ The whole quasi 95% interval lies below 20 in 3 cases (C92_023, C92_024, C92_086
 below 20 in 39. A birth-boundary maximum is not positive evidence of founding at birth, but a lower
 constraint does not by itself explain an upper interval end below 20 either: for C92_023 and
 C92_024 daughter trajectories and other constraints may carry real information.
+
+### 2e. Late evolution under comparable classification
+
+The paper's real-data rule (Methods): late if the putative pre-leukaemic clone is detectable only
+within 1-2 years before diagnosis, or no driver is detected. The ten real late cases (authors'
+`Figure_2.ipynb` list): five with no detection at all (C92_015, C92_043, C92_044, C92_048, C92_063;
+for three of them the last sample was 3.5-5.5 years before diagnosis), four first detected within 2
+years after earlier negative samples (C92_047, C92_052, C92_055, C92_072), and C92_016, detected at
+every sample from 6.25 years and listed as "linear/late" (its late NPM1 clone is the presumed
+pre-leukaemic clone, with an earlier DNMT3A clone treated as background). The two real cases sampled
+only in the final 2 years (C92_065, C92_066) were not called late, so a late detection evidently
+requires an earlier negative sample.
+
+Simulated version (`analysis/late_obs.py`, `runs/late_obs2.txt`, `runs/late_obs3.txt`): each of the
+928 simulated AML cases receives the sample schedule of a randomly drawn real case (40 draws per
+case; exact months where the public calls file has them, else timing-group midpoints); a trunk
+mutation is detected when its lineage VAF is at least 0.001; each trunk driver is off-panel
+independently with probability $p$; late = no detection, or first detection within 2 years after an
+earlier negative sample. Rule A takes the first visible trunk driver's lineage as the pre-leukaemic
+clone, rule B the second (an earlier visible driver treated as background, as for C92_016).
+
+| off-panel probability $p$ | P(at least 1 of 4 drivers off-panel) | late, rule A | late, rule B |
+|---|---|---|---|
+| 0 | 0 | 0.00% | 0.00% |
+| 0.12 | 0.40 | 0.15% | 2.56% (no detection 1.80%) |
+| 0.15 | 0.48 | 0.23% | 4.17% (no detection 2.98%) |
+| 0.3 | 0.76 | 2.0% | 16.5% (no detection 13.0%) |
+| 0.5 | 0.94 | 9.8% | 43% |
+
+Observed: 10/47 = 21.3% (10.7-35.7%); no detection 5/47 (3.5-23.1%); late detection after a
+negative sample 4/47 (2.4-20.4%). The real data show a missing driver (inferred X/Y/Z, 14 cases) or no
+driver (5 cases) in 19 of 47 cases (40%), which calibrates $p\approx0.12$-$0.15$ under the
+independence assumption.
+
+Conclusions. (i) The simulation's own classifier and the paper's real-data rule are not comparable,
+so the 27-fold figure overstates the gap. (ii) Sparse sampling and the detection limit do not by
+themselves create late cases in the model. (iii) At the calibrated off-panel rate the model's late
+fraction is 0.15-4.2% depending on the definition, still below the observed interval; matching it
+would need about 30% of drivers off-panel, inconsistent with the 40% of cases showing a missing
+driver. (iv) Independent per-driver panel misses are a crude model: a subset of AMLs with largely
+invisible routes (the paper's own suggestion: off-panel drivers or single ultra-rare events) lies
+outside the published model and could close the gap. Limits: depth noise and calling thresholds are
+not modelled beyond the 0.1% VAF cut; draws reuse the 928 cases, so the effective sample is 928.
 
 ## 3. Founders swept before sampling
 
