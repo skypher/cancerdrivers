@@ -10,6 +10,25 @@ Thank you for publishing the code and the public data alongside your paper; it m
 possible. While working through the modelling we came across a few points we would be grateful if
 you could clarify. We may well have missed something, and we would welcome a correction.
 
+Executive summary
+
+- The data and the qualitative picture (early first drivers, later drivers of increasing fitness,
+  sweeps preceding AML) held up in our checks.
+- The Fig. 5 simulation, as coded, appears to run at a population scale N*tau of about 2x10^4 (in the
+  convention of your 2020 Science paper), five times below the stated 10^5. At the stated value with
+  the stated mutation rate it overshoots AML incidence (about 6.6% lifetime risk instead of 0.47%).
+  Re-tuning the mutation rate restores incidence, patterns, driver timing and the fitness ladder,
+  but changes the reported sweep PPVs.
+- The uncertainties reported for clone fitness and establishment time (Supplementary Table 9)
+  reflect optimiser variability rather than sampling uncertainty. Likelihood-based intervals on the
+  public data are much wider, and some parameters, notably those of founders that swept before the
+  first sample, are only weakly identified.
+- Two possible issues in the inference code, whose effect we have not assessed.
+- The model rarely produces cases with no detectable driver (5 of 47 in the cohort), which seems
+  consistent with your suggestion of routes outside the panel or the four-hit model.
+
+Details
+
 1. Population scale of the Fig. 5 simulation. The paper states Nτ ≈ 10^5 (refs 38, 39, 41) and
    U ≈ 10^-5 per year. sim_fast.py resamples every clone as Poisson(n·exp((F − x̄)dt)) with N = 10^5 and
    dt = 0.1 yr. Matching its drift variance and establishment probability to the birth-death rates in
@@ -48,6 +67,24 @@ you could clarify. We may well have missed something, and we would welcome a cor
    the model's no-panel-driver rate. The cohort has 5 of 47 such cases. This seems consistent with your suggestion that some AMLs
    follow routes outside the panel or the four-hit model, though other explanations remain possible,
    and we wondered whether you had considered adding such a route.
+
+Recommended actions and expected impact
+
+1. Clarify the simulation parameters (N*tau, U and the role of dt) and, if the code's effective scale
+   is the intended one, state it, or re-run Fig. 5 at the stated parameters with re-tuned U.
+   Impact: the Fig. 5e PPVs would change (in our re-tuning, for example, 61% instead of 46% at age
+   60); incidence, patterns, timing and the fitness ladder were approximately preserved. It would
+   also let readers reuse the parameters consistently.
+2. Report likelihood-profile or bootstrap intervals for clone fitness and establishment time, and
+   flag weakly identified founders. Impact: individual acquisition ages and fitness values (Figs 3
+   and 4, Supplementary Table 9) would carry much wider uncertainty; aggregate statements such as the
+   share of first drivers acquired by age 20 would rest on a population-level analysis rather than
+   on per-case point estimates.
+3. Check the two code points in item 3. Impact: probably small, but it would rule out errors in the
+   reported establishment times.
+4. Consider an observation-matched comparison of the evolutionary patterns (real sampling schedules
+   and panel), and possibly a route for no-driver and late cases. Impact: the statement that the
+   model reproduces the observed patterns would then rest on a like-for-like comparison.
 
 Our notes and code are at https://github.com/skypher/cancerdrivers (notes/recheck.md,
 theory/theory.md).
