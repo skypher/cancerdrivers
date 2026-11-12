@@ -1,4 +1,4 @@
-# Draft email to the corresponding authors (not sent)
+# Email to the corresponding authors (sent 2026-11-12 05:02Z, from leslie.polzer@googlemail.com, Reply-To polzer@fastmail.com)
 
 To: Caroline J. Watson <cw672@cam.ac.uk>, Jamie R. Blundell <jrb75@cam.ac.uk> (corresponding authors,
 per the article's correspondence section)
