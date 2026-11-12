@@ -161,8 +161,10 @@ Consequences.
   time-homogeneous multistage model calibrated to the incidence curve predicts. It is a
   consistency check, not independent support for the specific model.
 - The paper's own simulation, whose incidence is zero before 40 and therefore steeper, predicts
-  93%: more than the 68% the paper reads from its trajectory fits, and more than the 47% expected
-  after the age correction of Proposition 4 at the code's $N\tau=10^4$ (see `notes/recheck.md`).
+  93%. Applied to simulated cases from that model, the trajectory estimator reports 57% where the
+  truth is 94% (`notes/recheck.md` §2b), because most founders swept before sampling. The 68% read
+  from the real trajectories is therefore compatible with the model, but it does not measure
+  founding ages; Proposition 5 does, given the incidence curve.
 
 ## 4. Stage structure of the AML lineage
 
@@ -228,15 +230,37 @@ fitness $F'$ during the time it has at most $M$ cells at expected number
 $\approx U\,q(F')\,M/F\approx 2hUM\,F'/F$. Chaining stages 2-4 and integrating over first
 drivers ($q(F_1)\approx 2hF_1$ cancels the $1/F_1$):
 $$\Lambda_{\rm late}\approx NU\,(2h)^4\,U^3M^3\,E[F_4]\approx 3\times10^{-11}\ \text{per year},$$
-about $2\times10^{-9}$ per lifetime, against an AML risk of $4.6\times10^{-3}$. The expected number
-of late cases in 200,200 simulated lives is about $4\times10^{-4}$, consistent with 0 of 943. The
-observed 10 of 47 (about 0.1% lifetime risk) needs a second channel at least $10^6$ times larger,
-for example single events that confer more than about 3/yr directly in wild-type cells, or drivers
-outside the sequencing panel.
+(with $NU=1$, $(2h)^4=1.6\times10^{-3}$, $(UM)^3=8\times10^{-9}$, $E[F_4]\approx2.3$), about
+$2.5\times10^{-9}$ per lifetime, against an AML risk of $4.6\times10^{-3}$. The expected number of
+late cases in 200,200 simulated lives is about $5\times10^{-4}$, consistent with 0 of 943. The
+observed 10 of 47 (about $10^{-3}$ lifetime risk) needs a second channel about $4\times10^5$ times
+larger: for example single events that confer more than about 3/yr directly in wild-type cells,
+or drivers outside the sequencing panel. The estimate ignores the extra requirement that the
+4-driver clone then reach 50% within the two years, so it overstates the model's late rate.
 
 ## 7. Positive predictive value of sweeps
 
-RESULT_HORIZON
+For a person who at age $a$ carries a clone with $k$ drivers at frequency $f$, the probability of
+AML before the horizon $T_h$ is the completion probability of the rest of the lineage within
+$T_h-a$ (the single-lineage reduction of §4). The PPV of Fig. 5e is this probability averaged over
+everyone who meets the criterion at age $a$. It therefore falls with age for two reasons: less
+time remains before the horizon, and the pool meeting the criterion grows with age and contains
+more slow clones.
+
+*Numerical* (`runs/horizon/`, the same 200,200 simulated lives followed to 100 instead of 85; the
+lives are identical up to 85 because each life has its own random stream). PPV of "largest VAF
+> 30% and second VAF > 10%":
+
+| age | horizon 85 | horizon 100 |
+|---|---|---|
+| 40 | 50/56 = 89% | 56/56 = 100% |
+| 50 | 217/303 = 72% | 282/303 = 93% |
+| 60 | 553/1204 = 46% | 962/1204 = 80% |
+| 70 | 733/3422 = 21% | 2117/3422 = 62% |
+
+Most of the decline with age is the horizon. A person meeting the criterion at 70 usually
+progresses, but after 85. In the model the predictive value is high at every age. The published
+numbers are tied to the 85-year cut-off, not to competing mortality.
 
 ## Files
 
