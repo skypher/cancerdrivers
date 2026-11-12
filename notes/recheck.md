@@ -24,14 +24,14 @@ job_f9cc4981, gpt-6-pro); verdicts noted per item.
    ($U=3.8\times10^{-6}$, 200,200 lives) it gives 0.50% and reproduces the incidence shape, the
    pattern fractions (66/34/0%, published 69/31/0%), the median driver ages (5.4, 39.8, 61.9, 74.2
    against 6.0, 39.1, 61.1, 74.1) and the conditioned fitness ladder; the sweep PPVs change (40-70:
-   100%, 94%, 61%, 26% on fewer qualifying people, against 89%, 72%, 46%, 21%). Re-tuning the
+   24/24, 133/142, 480/783, 770/2984, i.e. 100% [86-100], 94%, 61%, 26%, against 89%, 72%, 46%, 21%). Re-tuning the
    fitness scale instead ($s_1=0.1165$) also fits incidence but lowers absolute conditioned fitness
    by about 25%, gives more branched cases (57/43/0%) and higher PPVs (60: 82%, 70: 39%). So this is
    an internal inconsistency between the stated and the simulated parameters, which matters for the
    reported PPVs, possibly for the absolute fitness scale, and for anyone re-using $(N\tau, U)$; it
-   is not a flaw in the qualitative conclusions (theory §8).
-   Separately, the published results depend on the simulation time step (halving it at fixed $N$
-   gives 0.15%), a numerical defect of the update rule.
+   does not by itself overturn the listed outputs (theory §8; two one-parameter re-tunings only).
+   Because the code's drift scale is $N\tau=2N\,dt$, the time step is a model parameter, not a
+   refinable numerical step: halving it at fixed $N$ halves $N\tau$ and gives 0.15%.
 2. **Fitted establishment times carry an irreducible spread and a scale-dependent offset, for a
    surrogate time** (Pro: the earlier wording failed; repaired). Under the exponential-establishment
    approximation, the own-size time $\tilde t_e=t_0+\log(1+s)/s$ differs from the true founding time
@@ -88,11 +88,12 @@ job_f9cc4981, gpt-6-pro); verdicts noted per item.
    close to the published ones (§4); an earlier draft calling the decline an artefact of the age-85
    cut-off was wrong. This shows robustness within the model and scenarios, not calibration of
    real-world PPVs.
-9. **Possible issues in the authors' inference code** (found by the Pro review; effect on published
-   results not assessed). In v16 `likelihood_clones`, `establishment_age` is not reset between clones,
-   so a clone whose frequency never reaches $10^{-5}$ would inherit the previous clone's value; reported
-   ages use `np.linspace(0, T*dt, T)` while trajectories use `i*dt` (grids differ by up to 0.1 yr).
-   In `sim_fast.py` diagnosis is recorded as `t*dt` after the update at index $t$.
+9. **Possible issues in the authors' inference code** (found by the Pro review; effects not
+   assessed). In v16 `likelihood_clones`, `establishment_age` is not reset between clones, so a clone
+   whose frequency never reaches $10^{-5}$ would inherit the previous clone's value (whether any
+   clone takes that path needs a code-path check); reported ages use `np.linspace(0, T*dt, T)` while
+   trajectories use `i*dt`, which differ by at most one step $h$; in `sim_fast.py` diagnosis is
+   recorded as `t*dt` after the update at index $t$ (effect not checked).
 
 Details follow.
 
@@ -120,7 +121,8 @@ Re-tuned at the stated scale ($N=5\times10^5$, $dt=0.1$, $U=3.8\times10^{-6}$; `
 and conditioned fitness; only the sweep PPVs shift (summary item 1). Either the stated parameters
 are mislabelled, or the published simulations do not implement them. The
 incidence fit, the pattern fractions and the PPVs of Fig. 5 all come from the model at the code's
-implicit scale. The dependence on the time step holds under any convention.
+implicit scale. In this code the time step sets the drift scale ($N\tau=2N\,dt$), so it is a model
+parameter rather than a refinable numerical step.
 
 ## 2. Acquisition ages
 

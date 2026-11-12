@@ -91,12 +91,16 @@ model's outputs inherit the scaling is not proved here; the table below tests it
 
 *What $N\tau$ the code corresponds to.* The paper takes $N\tau\approx10^5$ from its refs 38, 39 and
 41. Ref 39 (Watson et al., Science 2020; bioRxiv 569566, Supplementary Note 2) fixes the
-normalisation by explicit per-cell rates: symmetric self-renewal at $\lambda r(1+s/2)$ and symmetric
-differentiation at $\lambda r(1-s/2)$, with $1/\tau=\lambda r$. The drift variance is $2n/\tau$ per
-year and a new clone survives with probability $q\approx s\tau$ (fitness $s$ per year). The Poisson
-update has variance $n/h$ per year and $q\approx2sh$, so the code corresponds to $\tau=2h=0.2$ yr and
-$N\tau=2\times10^4$, five times below the stated value; the stated value corresponds to
-$Nh=5\times10^4$. (That paper's text calls $1/\tau$ "the number of symmetric divisions per year",
+normalisation by explicit per-cell rates: symmetric self-renewal at $b=\lambda r(1+\sigma/2)$ and
+symmetric differentiation at $d=\lambda r(1-\sigma/2)$, with $1/\tau=\lambda r$ and $\sigma$ the
+dimensionless selection coefficient per $\tau$ (written $s$ there). The per-year growth rate is
+$g=b-d=\sigma/\tau$, the drift variance is $(b+d)n=2n/\tau$ per year, and a new clone survives with
+probability $q=1-d/b=\sigma/(1+\sigma/2)=g\tau/(1+g\tau/2)\approx g\tau$. The Poisson update has
+variance $n e^{gh}/h\approx n/h$ per year and survival $q\approx2gh$, so matching the leading-order
+variance and survival gives $\tau=2h=0.2$ yr and $N\tau=2\times10^4$, five times below the stated
+value; the stated value corresponds to $Nh=5\times10^4$. Because $\tau=2h$, changing $h$ at fixed
+$N$ changes the physical drift scale $N\tau$: in this code $h$ is a model parameter, not a numerical
+step that can be refined at fixed model. (That paper's text calls $1/\tau$ "the number of symmetric divisions per year",
 while its rates give $2/\tau$; the value used here is the one fixed by its equations, $c=1$ and
 $\tilde n=(e^{sT}-1)/s$.) Refs 38 and 41 estimate $N\tau$ phylodynamically from coalescence rates;
 the quoted excerpts do not fix the factor-of-two normalisation, and a binary self-renewal model
@@ -365,17 +369,26 @@ and re-tune one other parameter to the observed lifetime risk (`runs/retune/`,
 | stated scale, $U=3.8\times10^{-6}$ | 0.496% | 66/34/0% | 5.4, 39.8, 61.9, 74.2 | 0.19, 0.60, 1.59, 4.12 | 100, 94, 61, 26% |
 | stated scale, $s_1=0.1165$ | 0.486% | 57/43/0% | 5.9, 34.2, 58.8, 72.4 | 0.13, 0.41, 1.15, 3.11 | 100, 98, 82, 39% |
 
+PPV numerators, denominators and two-sided 95% Clopper-Pearson intervals (ages 40/50/60/70):
+published 50/56 [78-96%], 217/303 [66-77%], 553/1204 [43-49%], 733/3422 [20-23%]; re-tuned in $U$
+24/24 [86-100%], 133/142 [88-97%], 480/783 [58-65%], 770/2984 [24-27%]; re-tuned in $s_1$ 19/19
+[82-100%], 117/120 [93-99%], 384/470 [78-85%], 665/1725 [36-41%]. With 19-24 qualifiers at 40, the
+100% point estimates are not population certainties.
+
 Incidence shape (ratio to the CRUK male-female average at 60-64, 70-74, 80-84): 0.41, 0.93, 1.50
-published; 0.41, 0.90, 1.67 re-tuned in $U$; 0.60, 1.08, 1.55 re-tuned in $s_1$. Re-tuning $U$
-leaves incidence shape, patterns, driver timing and the conditioned fitness ladder essentially
-unchanged. Re-tuning $s_1$ also fits incidence but lowers the absolute conditioned fitness by about
-25% (ratios unchanged), makes more cases branched and moves the later drivers 2-5 years earlier. In
+published; 0.41, 0.90, 1.67 re-tuned in $U$; 0.60, 1.08, 1.55 re-tuned in $s_1$. These show that the
+re-tuned runs approximately preserve the published simulation's shape, not that either fits CRUK
+well. Re-tuning $U$ approximately preserves the listed outputs: incidence shape, patterns, driver
+timing and the conditioned fitness ladder. Re-tuning $s_1$ also fits incidence but lowers the
+absolute conditioned fitness by 21-28% (adjacent ratios approximately similar), makes more cases
+branched and moves the later drivers 2-5 years earlier. In
 both, the sweep PPVs change, because at the larger scale fewer people reach the sweep criterion at a
 given age (19-24 and 117-142 qualifying at 40 and 50 against 56 and 303) and those who do are more
-advanced. So the mismatch is an inconsistency between stated and simulated parameters: the
-qualitative behaviour survives at the stated scale, while the PPVs and (depending on which
-parameter absorbs the change) the absolute fitness scale depend on it. Only one-parameter re-tunings
-were tried.
+advanced. So the mismatch is an inconsistency between stated and simulated parameters: the listed
+outputs are approximately preserved at the stated scale, while the PPVs and (depending on which
+parameter absorbs the change) the absolute fitness scale depend on it. Only two one-parameter
+re-tunings were tried; they do not establish unique parameters or rule out joint tuning, and they
+cover only the listed outputs, not every qualitative conclusion of the paper.
 
 ## Files
 
