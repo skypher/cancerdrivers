@@ -363,14 +363,19 @@ and re-tune one other parameter to the observed lifetime risk (`runs/retune/`,
 |---|---|---|---|---|---|
 | published ($Nh=10^4$, $U=10^{-5}$, $s_1=0.16$) | 0.464% | 69/31/0% | 6.0, 39.1, 61.1, 74.1 | 0.18, 0.57, 1.54, 3.93 | 89, 72, 46, 21% |
 | stated scale, $U=3.8\times10^{-6}$ | 0.496% | 66/34/0% | 5.4, 39.8, 61.9, 74.2 | 0.19, 0.60, 1.59, 4.12 | 100, 94, 61, 26% |
-| stated scale, $s_1=0.1165$ | RESULT_S1 |
+| stated scale, $s_1=0.1165$ | 0.486% | 57/43/0% | 5.9, 34.2, 58.8, 72.4 | 0.13, 0.41, 1.15, 3.11 | 100, 98, 82, 39% |
 
-The incidence shape (ratio to the CRUK male-female average at 60-64, 70-74, 80-84: 0.41, 0.93, 1.50
-published; 0.41, 0.90, 1.67 re-tuned in $U$) is similar. So the main outputs do not depend on the
-scale once one other parameter is re-tuned: the mismatch is an inconsistency between stated and
-simulated parameters, not a change in the model's qualitative behaviour. The sweep PPVs do change,
-because at the larger scale fewer people reach the sweep criterion at a given age (24 and 142
-qualifying at 40 and 50 against 56 and 303), and those who do are more advanced.
+Incidence shape (ratio to the CRUK male-female average at 60-64, 70-74, 80-84): 0.41, 0.93, 1.50
+published; 0.41, 0.90, 1.67 re-tuned in $U$; 0.60, 1.08, 1.55 re-tuned in $s_1$. Re-tuning $U$
+leaves incidence shape, patterns, driver timing and the conditioned fitness ladder essentially
+unchanged. Re-tuning $s_1$ also fits incidence but lowers the absolute conditioned fitness by about
+25% (ratios unchanged), makes more cases branched and moves the later drivers 2-5 years earlier. In
+both, the sweep PPVs change, because at the larger scale fewer people reach the sweep criterion at a
+given age (19-24 and 117-142 qualifying at 40 and 50 against 56 and 303) and those who do are more
+advanced. So the mismatch is an inconsistency between stated and simulated parameters: the
+qualitative behaviour survives at the stated scale, while the PPVs and (depending on which
+parameter absorbs the change) the absolute fitness scale depend on it. Only one-parameter re-tunings
+were tried.
 
 ## Files
 

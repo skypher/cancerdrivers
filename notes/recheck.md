@@ -24,9 +24,12 @@ job_f9cc4981, gpt-6-pro); verdicts noted per item.
    ($U=3.8\times10^{-6}$, 200,200 lives) it gives 0.50% and reproduces the incidence shape, the
    pattern fractions (66/34/0%, published 69/31/0%), the median driver ages (5.4, 39.8, 61.9, 74.2
    against 6.0, 39.1, 61.1, 74.1) and the conditioned fitness ladder; the sweep PPVs change (40-70:
-   100%, 94%, 61%, 26% on fewer qualifying people, against 89%, 72%, 46%, 21%). So this is an
-   internal inconsistency between the stated and the simulated parameters, which matters for the
-   reported PPVs and for any reader re-using $(N\tau, U)$, not a flaw in the qualitative conclusions.
+   100%, 94%, 61%, 26% on fewer qualifying people, against 89%, 72%, 46%, 21%). Re-tuning the
+   fitness scale instead ($s_1=0.1165$) also fits incidence but lowers absolute conditioned fitness
+   by about 25%, gives more branched cases (57/43/0%) and higher PPVs (60: 82%, 70: 39%). So this is
+   an internal inconsistency between the stated and the simulated parameters, which matters for the
+   reported PPVs, possibly for the absolute fitness scale, and for anyone re-using $(N\tau, U)$; it
+   is not a flaw in the qualitative conclusions (theory §8).
    Separately, the published results depend on the simulation time step (halving it at fixed $N$
    gives 0.15%), a numerical defect of the update rule.
 2. **Fitted establishment times carry an irreducible spread and a scale-dependent offset, for a
@@ -156,10 +159,11 @@ these simulated cases the founder had swept before the first sample, against 11 
 measure mainly the failure on swept founders. Results for the stratum that dominates the real data
 (founder not swept) are in §2b2.
 
-The simulated fits in §2b, §2b2, §2c (coverage) and §3b used refit as it was before the
-2026-11-12 repair. For simulated inputs (variant names m1, m2, ..., no JAK2 or chr4q variants,
-`Upper_freq` 1) the only difference is the former exponent cap, which can matter only for very
-fast clones.
+The simulated fits in §2b and §3b used refit as it was before the 2026-11-12 repair (for these
+inputs the only difference is the former exponent cap, whose effect can propagate through the
+common denominator); they were not rerun. The matched-stratum test (§2b2) and the coverage check
+(§2c) were rerun with the repaired refit, with unchanged results (`runs/matched/ns5/`,
+`runs/coverage5/`).
 
 Results (`runs/simfit/eval.txt`):
 - In 874 of 923 cases the first driver of the AML lineage had VAF > 0.4 at the first sample: it
@@ -276,7 +280,8 @@ Results (`runs/refit/full5/eval.txt`, 42 cases, 33 controls, 222 clones; repaire
   4-driver clones (median widths 40, 21, 1.5, 2.9 years); for fast clones the interval is narrower
   than the gap between $t_e$ and the founding time (Prop. 4). This is not a coverage audit of the
   $t_e$ parameter itself. A calibrated interval could differ in centre and shape as well as width,
-  so these results do not imply an ordering of widths.
+  so these results do not imply an ordering of widths. Rerun with the repaired re-fit
+  (`runs/coverage5/eval.txt`): fitness 67%, 93%, 91%, 97%; founding time 87%, 83%, 52%, 59%.
 - Flat ridges: rerunning the fit (repaired code, new random restarts) moved the point estimates of
   16 persons other than C92_034 while their maximum log-likelihood agreed with the previous run to
   three decimals (two others improved by 0.07 and 0.89, where the old exponent cap had been
