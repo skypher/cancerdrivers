@@ -1,0 +1,7 @@
+runs/
+*.o
+/sim/bin/
+__pycache__/
+sources/code/
+sources/nature/MOESM1.pdf
+sources/nature/MOESM4.pdf
