@@ -287,8 +287,8 @@ is a statement about the paper's model in simulation; it does not validate the r
   woman who cannot die of anything else. Weighting each AML by survival from the screening age to
   diagnosis, $S(T)/S(a)$, with other-cause death independent of the clones (Gompertz, life
   expectancy 16.5 years at 70, an assumed scenario), the PPVs are 81%, 64%, 44%, 28% at 40-70,
-  close to the published 89%, 72%, 46%, 21% (theory note §7). AML after 100 is not counted (at most
-  4-5 points). Under this scenario the decline with age stands.
+  close to the published 89%, 72%, 46%, 21% (theory note §7). AML after 100 is not counted (below
+  2.6 points in each scenario). Under this scenario the decline with age stands.
 
 ## Files and reproduction
 

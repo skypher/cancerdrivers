@@ -303,8 +303,10 @@ screening age $a$ to diagnosis, $S(T)/S(a)$ (the person is alive at screening; o
 assumed independent of the clone dynamics; Gompertz mortality $\mu(x)=Ae^{Bx}$, $A$ set so that life expectancy at 70 is 16.5
 years, roughly UK women; `analysis/ppv_mort.py`) gives PPVs of 81%, 64%, 44%, 28% at 40, 50, 60,
 70 for $B=0.1$ (78-83%, 61-67%, 43-46%, 28% for $B=0.085$-$0.115$). These are close to the
-published 85-year figures. AML after 100 is not counted; its weight is at most
-$S(100)/S(a)\approx4$-$5\%$, so the omitted tail adds at most about 4-5 points. Under this
+published 85-year figures. AML after 100 is not counted. Its weight is at most $S(100)/S(a)$, which is 4.0-4.7% for
+$B=0.1$ and 2.6-6.8% across $B=0.085$-$0.115$; multiplying by the fraction of eligible people not
+diagnosed by 100 bounds the omitted tail below 2.6 points in all three scenarios (same
+assumptions; checked independently by yang2). Under this
 mortality scenario the PPV declines with age much as published; the cut-off is a reasonable proxy,
 slightly too generous before 60 and too strict at 70.
 
