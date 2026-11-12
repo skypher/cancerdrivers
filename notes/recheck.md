@@ -36,23 +36,23 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    founder's VAF is flat near 0.5 throughout (for example C92_019, C92_023, C92_024, C92_034), its
    fitness and age are set by the birth constraint: the smallest fitness that completes a sweep by
    the first sample when starting at birth.
-5b. **Under the paper's own model the estimator does not recover first-driver ages.** On 928
-   simulated AML cases (8 annual samples before diagnosis, true clone tree given to the
-   estimator), 95% of first drivers had swept before the first sample. Reported ages are on average
-   15 years later than the truth (s.d. 24). The estimator reports "first driver by 20" for 57% of
-   cases where the truth is 94%. Fitted fitness exceeds the truth by a median factor of 1.5 (1-, 3-
-   and 4-driver clones) to 2.2 (2-driver clones).
-6. **The geometric fitness ladder (Fig. 4c) may be produced by the estimator.** Under a model
-   with no built-in escalation ($r=1$, calibrated to incidence), the true conditioned clone
-   fitness rises 3.9-fold from single to quadruple mutants, additively. The paper's estimator
-   applied to those simulated cases reports a 19.8-fold rise (0.13, 0.58, 1.94, 2.48 per year). The
-   main cause is the first step: a founder that swept before sampling is assigned roughly the
-   smallest fitness that could sweep from birth, about 0.13 per year, whatever its true value. In
-   the published model the conditioned increments sit at the input scales $a_k=s_1r^{k-1}$, so its
-   agreement with Fig. 4c reproduces the assumed $r=2.5$ (§3b, theory note §5).
-   Limit of this test: all 400 simulated founders had swept, against 11 of 42 real ones. It shows
-   the mechanism and applies to the real swept founders. It does not measure how much of the
-   real Fig. 4c ladder is artefact.
+5b. **Under the paper's own model, the estimator's first-driver ages are unbiased in the median
+   but very imprecise, and it misses early founding.** Simulated AML cases matched to the real
+   stratum (founder not swept at the first sample, 272 cases): founding-age error median +0.2
+   years, s.d. 18; reported "first driver by 20" 70% against a true 84%. Swept founders (95% of
+   simulated cases, 11 of 42 real ones): error +15 years, reported 57% against a true 94%.
+   Reweighted to the real mix, the estimator would report about 66% (the paper finds 68%) where
+   the model's truth is about 87%. So the paper's 68% is what its model plus its estimator would
+   produce; it understates early founding, and single-case ages carry an 18-year s.d. (§2b, §2b2).
+6. **The fitness ladder (Fig. 4c) is mostly recovered correctly, except for swept founders.** In the
+   matched stratum the estimator recovers clone fitness to within a median factor of 1.0-1.2 at
+   every driver number. For a founder that swept before sampling it assigns roughly the smallest
+   fitness that could sweep from birth (about 0.13 per year) whatever the truth: from an $r=1$
+   truth (additive ladder, 3.9-fold rise) such cases give a 19.8-fold fitted rise. This affects
+   the 11 of 42 real cases with swept founders (whose founders' fitted values 0.07-0.21 should be
+   discounted), not the ladder as a whole. Separately, in the published model the conditioned
+   increments sit at the input scales $a_k=s_1r^{k-1}$, so the model's agreement with Fig. 4c
+   reproduces the assumed $r=2.5$ rather than testing it (§3b, theory note §5).
 7. **The model cannot produce late evolution, by a factor of about $4\times10^5$** (theory note §6).
 8. **The PPV decline with age stands.** The 85-year cut-off is a crude proxy for death from other causes; with explicit competing mortality the PPVs are close to the published ones (§4 below). An earlier draft of this note called the decline an artefact of the cut-off; that was wrong.
 
@@ -126,7 +126,27 @@ what the real cases would show; see §2b2.
 
 ### 2b2. Matched stratum: founders not swept at the first sample
 
-RESULT_MATCHED
+Design as in §2b, on a larger run of the published model (1.2 million lives, 5606 AML cases,
+`runs/matched/`), keeping only the 272 cases whose AML founder had VAF <= 0.4 at the first sample
+(`sim2refit.py --notswept`).
+
+Results (`runs/matched/ns/eval.txt`):
+- Founding age of the AML-lineage founder, reported minus true: median +0.2 years, mean +5.0, s.d.
+  18.2.
+- Reported $t_e\le20$: 62% (AML-lineage founders) and 70% (Fig. 4b rule) against true 80% and 84%.
+- Fitted over true fitness, median (IQR): 1-driver 1.20 (0.95-2.00), 2-driver 1.04 (0.96-1.22),
+  3-driver 1.02 (0.99-1.07), 4-driver 1.10 (0.98-1.67). Medians fitted/true: 0.165/0.128,
+  0.468/0.424, 1.449/1.368, 4.283/3.976.
+- Pearson dispersion 1.14 (real data 3.06).
+
+Mixture at the real proportions (28 not swept, 11 swept among the 39 cases with an observed
+founder variant), using §2b for the swept stratum: estimator reports "by 20" for about 66%, truth
+about 87%. The paper's 68% is in line with what its model would produce through its estimator.
+
+Prop. 4's offset ($-9.6$ years at these fitness values) does not show up here because Prop. 4 is
+the average over the establishment factor $X$ for a clone with a given founding time. Selecting
+AML cases whose founder is still small eight years before diagnosis selects small $X$, which
+moves the fitted time later. The spread is the robust part.
 
 ### 2b3. A mismatch between the model and the data
 
@@ -202,9 +222,11 @@ sample. Their fitted fitness (median 0.13, a quarter of the truth) is the birth-
 changes no median by more than 0.004. With the published $r=2.5$ (§2b) the estimator's ladder
 (0.23, 1.24, 2.33, 5.85) is also steeper at the first step than the truth (0.18, 0.57, 1.54, 3.93).
 
-So a steep ladder in the trajectory fits is expected whether or not drivers escalate. Fig. 4c
-cannot distinguish $r=2.5$ from $r=1$ without a correction for this bias. In the real data,
-19 of 42 earliest clones sit on the birth constraint (§2d), with fitted fitness 0.07-0.21.
+So swept founders produce a steep first step whether or not drivers escalate. The test cannot be
+repeated on not-swept founders under $r=1$ (none of the 400 was), but in the published model the
+estimator recovers fitness well for not-swept founders (§2b2). The bias therefore concerns the
+real cases with swept founders (11 of 42 by first-sample VAF; 19 of 42 earliest clones sit on the
+birth constraint, §2d, with fitted fitness 0.07-0.21), not the ladder as a whole.
 
 ## 4. Smaller points
 

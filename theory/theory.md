@@ -110,6 +110,10 @@ $$E[t_e-t_m]=\frac{\gamma-\kappa+\log(1+s)}{s},\qquad \mathrm{sd}(t_e-t_m)=\frac
 (Proposition 2 with $\tau=h$). $\square$
 
 Consequences.
+- Proposition 4 averages over $X$ for a clone with a given founding time. In samples selected on
+  the trajectory (for example AML cases whose founder is still small years before diagnosis) the
+  selection acts on $X$ and shifts the offset; the simulation tests in `notes/recheck.md` §2b2 show
+  this. The spread is the robust part.
 - The spread $1.28/s$ does not shrink with more data: it is the unobservable luck of the
   clone's first few divisions. For a first driver with $s=0.1$/yr it is 13 years.
 - The offset depends on the population scale. In the code's own model ($N\tau=10^4$, $\kappa=\log 5$)
@@ -161,10 +165,10 @@ Consequences.
   time-homogeneous multistage model calibrated to the incidence curve predicts. It is a
   consistency check, not independent support for the specific model.
 - The paper's own simulation, whose incidence is zero before 40 and therefore steeper, predicts
-  93%. Applied to simulated cases from that model, the trajectory estimator reports 57% where the
-  truth is 94% (`notes/recheck.md` §2b), because most founders swept before sampling. The 68% read
-  from the real trajectories is therefore compatible with the model, but it does not measure
-  founding ages; Proposition 5 does, given the incidence curve.
+  93%. Applied to simulated cases from that model with the real proportion of swept founders, the
+  trajectory estimator would report about 66% where the truth is about 87% (`notes/recheck.md`
+  §2b2). The 68% read from the real trajectories is in line with the model, but it understates
+  early founding; Proposition 5 gives the founding-age law directly from the incidence curve.
 
 ## 4. Stage structure of the AML lineage
 
