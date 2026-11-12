@@ -11,74 +11,85 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
 
 ## Summary
 
-1. **The simulation does not run at the stated population scale.** The paper states
-   $N\tau=10^5$ (from its refs 38, 39, 41). `sim_fast.py` resamples every 0.1 yr, which makes its
-   $N\tau=2\times10^4$ in the convention of ref 39 (Watson 2020, same group) or $10^4$ in the
-   coalescent convention of refs 38 and 41: 5 to 10 times below the stated value (Corollary 3 of
-   the theory note). At the stated $10^5$ the same model gives a lifetime AML risk of 6.6% (ref-39
-   convention) or 16% (coalescent), against 0.47% observed. Halving the time step at fixed $N$
-   gives 0.15%. The published fit to UK incidence holds only at the code's implicit scale.
-2. **Acquisition ages have an irreducible spread and a scale-dependent offset.** Under the
-   exponential-establishment approximation, the reported age $t_e$ differs from the true founding
-   time by $-(\log X+\kappa-\log(1+s))/s$, with $X$ the unobservable establishment luck (s.d.
-   $1.28/s$ for an unselected clone, 13 years at $s=0.1$/yr) and $\kappa=\log(10^5/(2N\tau))$
-   (Prop. 4). The sign of the offset flips between $N\tau=10^4$ and $10^5$. In cases selected on
-   their trajectories both offset and spread change.
-3. **The reported uncertainties are not confidence intervals.** They are the spread of optimiser
-   end points over 25 seeds within ±20% of the best negative log-likelihood. On the public data,
-   approximate 95% profile-likelihood intervals for reported ages, with the quasi-binomial
-   correction for the measured overdispersion (Pearson dispersion 3.1), have median width 52 years,
-   against 7 years for the published ranges; 144 of 156 case clones are wider. These intervals are
-   themselves approximate: on simulated data with known truth their fitness intervals cover the
-   true fitness for only 68% of single-driver clones (nominal 95%), and for 93%, 91% and 97% of
-   2-, 3- and 4-driver clones (§2c). Read as intervals for the true founding time, a different estimand from the fitted
-   $t_e$, they cover 52-86%; that is a diagnostic of using them for that purpose, not a coverage
-   audit of $t_e$.
-4. **The "first driver by age 20 in two thirds of cases" statement is not supported case by
-   case, and the incidence curve predicts it anyway.** In the re-fit, the maximum-likelihood
-   founding of 19 of 42 earliest clones sits on the constraint "founded at or after birth"; for 31
-   of 42 the approximate 95% interval reaches that constraint. Only 3 of 42 have an interval
-   entirely below age 20. Separately, the first-driver age law (Prop. 5) gives 74% by age 20 for a
-   woman diagnosed at 72 from UK incidence alone, for any model satisfying its assumptions
-   (constant supply of established founders, independent identically distributed delays).
-5. **Founders that had swept before sampling are weakly identified by their trajectories.** When
-   the founder's VAF is flat near 0.5 throughout (for example C92_019, C92_023, C92_024, C92_034),
-   the data say little about its fitness and age; the fit lands on the birth constraint, at about
-   the smallest fitness that completes a sweep by the first sample when starting at birth.
-5b. **Under the paper's own model, the estimator's first-driver ages show an observed median
-   error of +0.2 years in the matched simulation, with wide errors, and it misses early
-   founding.** Simulated AML cases matched to the real
-   stratum (founder not swept at the first sample, 272 cases): founding-age error median +0.2
-   years, s.d. 18; reported "first driver by 20" 70% against a true 84%. Swept founders (95% of
-   simulated cases, 11 of 42 real ones; 874 simulated): error mean +15 years, reported 56%
-   against a true 95%.
-   Reweighted to the real mix, the estimator would report about 66% (the paper finds 68%) where
-   the model's truth is about 87%. So the paper's 68% is what its model plus its estimator would
-   produce; in the model it understates early founding, and single-case ages carry an 18-year s.d.
-   The median error +0.2 years is observed, not a proof of unbiasedness. These are statements
-   about the paper's model, not a calibration of the real data (§2b, §2b2).
-6. **In simulation the fitness ladder is mostly recovered, except for swept founders.** In the
-   matched simulated stratum the estimator recovers clone fitness to within a median factor of
-   1.0-1.2 at every driver number. This is specific to the paper's model and does not validate the
-   real ladder. For a founder that swept before sampling it assigns roughly the smallest
-   fitness that could sweep from birth (about 0.13 per year) whatever the truth: from an $r=1$
-   truth (additive ladder, 3.9-fold rise) such cases give a 19.8-fold fitted rise. In the real data
-   this concerns the 11 of 42 cases with swept founders (first-sample VAF > 0.4) and, overlapping
-   with them in 6 cases, the 19 earliest clones fitted at the birth constraint (fitted fitness
-   0.05-0.21 per year); those founders' fitted values should be discounted. Separately, in the published model the conditioned
-   increments sit at the input scales $a_k=s_1r^{k-1}$, so the model's agreement with Fig. 4c
-   reproduces the assumed $r=2.5$ rather than testing it (§3b, theory note §5).
-7. **The model essentially never produces late evolution.** No late case among 928 simulated AML
-   cases (published: 0 of 943): two-sided 95% Clopper-Pearson upper end 0.40% of AML cases. The
-   observed fraction is 10/47, two-sided 95% interval 10.7-35.7%. The separate interval endpoints
-   differ by about 27-fold; a jointly calibrated conservative statement (Bonferroni, each
-   interval at 97.5%) gives a ratio of at least 20 with 95% confidence. This assumes independent
-   cases and comparable classification of simulated and real cases. A first-moment heuristic puts
-   the gap near $4\times10^5$; that figure is an estimate, not a bound (theory §6).
-8. **The PPV decline with age stands.** The 85-year cut-off is a crude proxy for death from other
-   causes; under an explicit competing-mortality scenario the PPVs are close to the published ones
-   (§4 below). An earlier draft of this note called the decline an artefact of the cut-off; that
-   was wrong.
+Revised 2026-11-12 after an independent ChatGPT Pro review (`notes/pro_review_01.md`, job
+job_f9cc4981, gpt-6-pro); verdicts noted per item.
+
+1. **The stated simulation parameters do not reproduce the published results; the effective ones
+   do** (Pro: holds with qualification; re-tuning added after the review). The paper states
+   $N\tau=10^5$ (from its refs 38, 39, 41) and $U=10^{-5}$. `sim_fast.py` resamples every 0.1 yr;
+   matched to the explicit birth-death rates of ref 39 (Watson 2020, same group) that is $\tau=0.2$ yr
+   and $N\tau=2\times10^4$, five times below the stated value. (An earlier version also claimed a
+   tenfold gap in "coalescent units"; withdrawn.) At the stated scale with $U=10^{-5}$ unchanged the
+   model gives a 6.6% lifetime risk against 0.47% observed. Re-tuned at the stated scale
+   ($U=3.8\times10^{-6}$, 200,200 lives) it gives 0.50% and reproduces the incidence shape, the
+   pattern fractions (66/34/0%, published 69/31/0%), the median driver ages (5.4, 39.8, 61.9, 74.2
+   against 6.0, 39.1, 61.1, 74.1) and the conditioned fitness ladder; the sweep PPVs change (40-70:
+   100%, 94%, 61%, 26% on fewer qualifying people, against 89%, 72%, 46%, 21%). So this is an
+   internal inconsistency between the stated and the simulated parameters, which matters for the
+   reported PPVs and for any reader re-using $(N\tau, U)$, not a flaw in the qualitative conclusions.
+   Separately, the published results depend on the simulation time step (halving it at fixed $N$
+   gives 0.15%), a numerical defect of the update rule.
+2. **Fitted establishment times carry an irreducible spread and a scale-dependent offset, for a
+   surrogate time** (Pro: the earlier wording failed; repaired). Under the exponential-establishment
+   approximation, the own-size time $\tilde t_e=t_0+\log(1+s)/s$ differs from the true founding time
+   by $-(\log X+\kappa-\log(1+s))/s$, with s.d. $1.28/s$ for a clone fitted in its exponential phase
+   and not selected on its trajectory, and $\kappa\approx\log(10^5/(N\tau))$ in ref-39 units (theory
+   Prop. 4). The paper's reported establishment time is a different quantity (first time the
+   normalised frequency reaches $10^{-5}$); the two agree only when other clones are negligible.
+3. **The published uncertainty ranges have no confidence-interval justification** (Pro: holds with
+   qualification). They are the spread of optimiser end points over 25 seeds within ±20% of the best
+   negative log-likelihood; seeds do not generate a sampling distribution, and a 20% tolerance does
+   not define coverage (it even depends on additive constants in the likelihood). An alternative
+   re-fit of the public data (§2c) exposes large uncertainty and instability: approximate profile
+   intervals for the own-size age have median width 52 years, and different restarts give very
+   different point estimates at numerically equal likelihood. These are not calibrated 95%
+   intervals: they target a modified objective and estimand and undercover in simulation.
+4. **Individual first-driver ages are weakly identified; the aggregate "by age 20" figure needs its
+   own analysis** (Pro: holds with qualification). In the re-fit, 19 of 42 earliest clones have their
+   maximum-likelihood founding on the birth constraint and only 3 have an interval entirely below
+   20. That shows weak identification of single cases, not that the population proportion is wrong:
+   many uncertain cases can still inform a proportion. Separately, Prop. 5 shows that for models
+   with constant founder supply and independent delays the incidence curve itself predicts the
+   founding-age distribution (74% by 20 for a woman diagnosed at 72 under UK female rates); agreement
+   with that is support for the model class, not discriminating support for the paper's mechanism.
+5. **Founders whose lineage is near fixation before sampling are weakly identified** (Pro: holds with
+   qualification). A first-driver VAF near 0.5 means its mutation-bearing lineage dominates, possibly
+   through descendants; the trajectories then constrain fitness differences much better than
+   absolute fitness and founding time, and the fit becomes sensitive to constraints (often landing
+   on the birth boundary).
+5b. **Simulated estimator tests (alternative re-fit, not the authors' full estimator)** (Pro: holds
+   with qualification). In simulated AML cases whose founder lineage had not swept at the first
+   sample (272 cases), founding-age errors had observed median within 0.2 years of zero and s.d. 18
+   years, and the estimator reported "first driver by 20" for 70% against a true 84% (the same with
+   the repaired re-fit); with the full simulated case
+   mix (95% swept) it reported 57% against 94%. These describe the tested designs; they are not a
+   calibration of the paper's 68% (32/47), and the real cohort's mix differs from the model's.
+6. **Fitness ladder** (Pro: holds with qualification). In the non-swept simulated stratum the
+   estimator recovers clone fitness with median ratio 1.0-1.2, though with wide spread for 1- and
+   4-driver clones. In one experiment with no built-in escalation ($r=1$) and all founders swept,
+   the fitted ladder was strongly distorted (19.8-fold fitted against 3.9-fold true). That is a
+   sensitivity warning for swept founders, not a general floor: under the published model the swept
+   founders' fitted median was 0.23 against 0.18 true. In the simulation the geometric escalation is
+   imposed by the input distributions (scales $s_1r^{k-1}$), so the model's agreement with Fig. 4c
+   reflects that assumption.
+7. **The model essentially never produces late evolution** (Pro: holds with qualification). No late
+   case among 928 simulated AML cases (published: 0 of 943): two-sided 95% Clopper-Pearson upper end
+   0.40%. Observed: 10/47, two-sided 95% interval 10.7-35.7%. Since each interval fails on its
+   relevant side with probability at most 2.5%, the ratio of the endpoints, about 27, is a joint 95%
+   lower confidence bound on the ratio of late fractions. This is conditional on comparable
+   classification: the simulation classifies on the complete first-driver lineage trajectory, the
+   real data on sparse samples and a finite panel, where an unobserved initiating driver can produce
+   an apparent late pattern. (A first-moment heuristic for the model's late rate is withdrawn as a
+   quantitative estimate; theory §6.)
+8. **The PPV decline with age stands** (Pro: holds). With explicit competing mortality the PPVs are
+   close to the published ones (§4); an earlier draft calling the decline an artefact of the age-85
+   cut-off was wrong. This shows robustness within the model and scenarios, not calibration of
+   real-world PPVs.
+9. **Possible issues in the authors' inference code** (found by the Pro review; effect on published
+   results not assessed). In v16 `likelihood_clones`, `establishment_age` is not reset between clones,
+   so a clone whose frequency never reaches $10^{-5}$ would inherit the previous clone's value; reported
+   ages use `np.linspace(0, T*dt, T)` while trajectories use `i*dt` (grids differ by up to 0.1 yr).
+   In `sim_fast.py` diagnosis is recorded as `t*dt` after the update at index $t$.
 
 Details follow.
 
@@ -101,7 +112,10 @@ $N=5\times10^5$, $dt=0.02$ (same $N\,dt$): 0.536%; $N=10^5$, $dt=0.05$: 0.146%; 
 $dt=0.1$ (the stated $N\tau=10^5$ in ref-39 units): 6.6% (20,000 lives); $N=10^6$, $dt=0.1$ (the
 stated value in coalescent units): 16.0% (4,000 lives).
 
-Either the stated parameter is wrong, or the published simulations do not implement it. The
+Re-tuned at the stated scale ($N=5\times10^5$, $dt=0.1$, $U=3.8\times10^{-6}$; `runs/retune/`,
+`runs/retune/compare_U.txt`), the model reproduces the published incidence, patterns, driver timing
+and conditioned fitness; only the sweep PPVs shift (summary item 1). Either the stated parameters
+are mislabelled, or the published simulations do not implement them. The
 incidence fit, the pattern fractions and the PPVs of Fig. 5 all come from the model at the code's
 implicit scale. The dependence on the time step holds under any convention.
 
@@ -125,8 +139,10 @@ changing under that selection.
 
 Applied to the published estimates (`analysis/ages.py`; earliest clone per case, the Fig. 4b
 rule): reported $t_e\le20$ in 32 of 42 fitted cases (32/47 = 68%, the paper's "two thirds").
-Expected number with true founding $\le20$: 22.3 at the code's scale, 30.7 at the stated
-$N\tau=10^5$ in ref-39 units, 32.4 at the stated value in coalescent units. Ten of the 42 reported ages are at $t_e\le1.5$, i.e. at the birth constraint.
+Expected number with true founding $\le20$ under the simplified posterior of theory §2 (constant
+founding prior, fixed fitted $s$): 22.3 at the code's scale, 30.7 at the stated $N\tau=10^5$ in
+ref-39 units. These rest on that simplified prior and observation model and are not calibrated
+estimates for the real cohort. Ten of the 42 reported ages are at $t_e\le1.5$, i.e. at the birth constraint.
 
 ### 2b. The estimator on simulated patients with known truth
 
@@ -161,7 +177,9 @@ Results (`runs/simfit/eval.txt`):
   inside a swept founder is the founder's (unidentified) fitness plus an identified difference,
   so the bias propagates up the ladder.
 - Pearson dispersion on the simulated read counts: 1.20. On the real data: 3.14. Real VAF series
-  fluctuate about 2.5 times more (in variance) than the model plus binomial sequencing implies.
+  show about 2.5 times more residual variance than the fitted model plus binomial sequencing
+  implies; this can come from biological variation, measurement differences or mean-model
+  misspecification, and does not by itself measure biological year-to-year variance.
 
 Caveats: the clean MLE differs from the authors' penalised fit; the real design has fewer samples
 (median 5), an inferred tree and missing drivers. Each of these makes recovery harder. The case mix
@@ -182,11 +200,15 @@ Results (`runs/matched/ns/eval.txt`):
   3-driver 1.02 (0.99-1.07), 4-driver 1.10 (0.98-1.67). Medians fitted/true: 0.165/0.128,
   0.468/0.424, 1.449/1.368, 4.283/3.976.
 - Pearson dispersion 1.14 (real data 3.14).
+- Rerun with the repaired re-fit (`runs/matched/ns5/eval.txt`): median error -0.2 years, mean +4.7,
+  s.d. 17.9; Fig. 4b rule reported 70.2% (true 84.2%); fitness ratios 1.18, 1.04, 1.02, 1.10. The
+  repair does not change these results.
 
-Mixture at the real proportions (28 not swept, 11 swept among the 39 cases with an observed
-founder variant), using the swept stratum of §2b (Fig. 4b rule): estimator reports "by 20" for
-66.1%, truth 87.2%. The paper's 68% is in line with what its model would produce through its
-estimator. This is arithmetic on simulated strata, not a calibration of the real data.
+A standardised exercise: weighting the simulated strata by the real proportions (28 not swept,
+11 swept among the 39 cases with an observed founder variant) gives "by 20" reported 66.1%, true
+87.2%. This is arithmetic on simulated strata with a mix the model itself does not produce; it is
+not a calibration of the paper's 68% (32/47, or 32/42 = 76% among fitted cases), and the observed
+fraction among the same 39 cases is not computed here.
 
 Prop. 4's offset ($-9.6$ years at these fitness values) does not show up here because Prop. 4 is
 the average over the establishment factor $X$ for a clone with a given founding time. Selecting
@@ -234,7 +256,8 @@ Profile intervals are computed for $s$ and $t_e$ of every clone, with the binomi
 Results (`runs/refit/full5/eval.txt`, 42 cases, 33 controls, 222 clones; repaired code of
 2026-11-12, replacing `runs/refit/full/`):
 - Pooled Pearson dispersion of the detected read counts: $\phi=3.14$ (1 under the binomial
-  model). Year-to-year variation is three times the sampling noise the likelihood assumes. Under
+  model): residual variation is three times what the binomial likelihood assumes (from biology,
+  measurement or mean-model misspecification; not separable here). Under
   regular, local conditions this would make binomial intervals too narrow by about $\sqrt{3}$;
   near boundaries and under weak identification the factor is not reliable.
 - Width of the 95% interval for $t_e$: median 52 years (cases) and 53 years (controls), against
@@ -263,34 +286,39 @@ Results (`runs/refit/full5/eval.txt`, 42 cases, 33 controls, 222 clones; repaire
   largely wherever the optimiser stops; the intervals are the meaningful summary.
 - Published values lie inside the quasi intervals for 151/156 ages and 137/156 fitnesses. The
   point estimates are compatible with the data; their stated precision is not.
-- In 15 of 42 cases the published parameters are worse than the maximum-likelihood fit by more
-  than the quasi 95% threshold for one parameter (at the best common time shift for the age
-  rounding), in 6 by more than four times that threshold. Their penalties and heuristics (one-
-  sided penalties for undetected timepoints, ordering penalties, manual starting values in
-  `Clonal_structure_for_each_sample.csv`) move the fit away from the stated likelihood.
+- Joint test of the published parameter vector against the re-fit's optimum (threshold
+  $\chi^2_{0.95}(2K)/2\cdot\phi$ for $2K$ parameters, at the best common time shift for the age
+  rounding): outside the joint region for 6 of 42 cases and 6 of 33 controls. (An earlier version
+  used a one-parameter threshold and reported 15 of 42; that was the wrong reference.) Since the
+  re-fit's objective differs from the authors' (penalties, censoring, mCA likelihood, depths), these
+  differences cannot be attributed to the authors' optimisation alone.
 
 ### 2d. The earliest clone per case (Fig. 4b)
 
 Maximum-likelihood $t_e\le20$ in 25 of 42; 19 of these sit at the constraint $t_0=0$ ($t_e\approx1$).
 The whole quasi 95% interval lies below 20 in 3 cases (C92_023, C92_024, C92_086); it reaches
-below 20 in 39. Two of the three (C92_023, C92_024) are founders at VAF about 0.47 in every
-sample, whose age is fixed by the birth constraint (§3).
+below 20 in 39. A birth-boundary maximum is not positive evidence of founding at birth, but a lower
+constraint does not by itself explain an upper interval end below 20 either: for C92_023 and
+C92_024 daughter trajectories and other constraints may carry real information.
 
 ## 3. Founders swept before sampling
 
-For a founder at fixation in every sample the trajectory is flat. Its own fitness and age are only
-weakly determined by the data. Through the normalisation they enter mainly as (i) a lower bound on fitness
+When a founder's variant is near fixation in every sample, its mutation-bearing lineage dominates,
+possibly through descendants rather than the one-driver genotype itself. The trajectory then
+constrains fitness differences much better than absolute fitness and founding time. If the
+one-driver genotype itself swept, its own parameters enter mainly as (i) a lower bound on fitness
 — to have swept by the first sample starting no earlier than birth, $e^{s a_1}/s\gtrsim10^5$ at the
 first sampling age $a_1$, i.e. $s\gtrsim0.2$/yr for $a_1\approx60$ — and (ii) the difference
-$s_{\rm daughter}-s_{\rm founder}$ that governs daughters growing inside it. The optimiser then
-lands at the corner $t_0=0$, $s\approx0.2$: in the re-fit C92_022 (0.21, $t_e$ 0.9), C92_023
+$s_{\rm daughter}-s_{\rm founder}$ that governs daughters growing inside it. In the re-fit the
+optimiser often lands near the corner $t_0=0$, $s\approx0.2$ (it need not; nearly equivalent
+points exist), for example C92_022 (0.21, $t_e$ 0.9), C92_023
 (0.20, 0.9), C92_024 (0.21, 0.9), and C92_019 (0.18, 0.9). For some of these founders the
 fitness interval is narrow (C92_024: 0.208-0.277); its lower end is set by the birth constraint,
 its upper end by the data through the daughters and the normalisation.
-Because daughters' absolute fitness equals the founder's plus the identified difference, the
-absolute fitness of every clone growing inside a swept founder inherits this indeterminacy.
+To the extent daughters' absolute fitness is the founder's plus a better-identified difference,
+their absolute fitness inherits this weak identification.
 
-## 3b. Does the estimator manufacture the fitness ladder?
+## 3b. Sensitivity of the fitted ladder to swept founders (an r = 1 experiment)
 
 Test (`runs/null/`): simulate the model with $r=1$ (every driver's increment from the same
 distribution, scale $s_1=0.5$, chosen so the lifetime risk is 0.51%), take 400 AML cases, and run
@@ -305,24 +333,27 @@ the same estimator and design as in §2b.
 
 The truth is an additive ladder (3.9-fold from 1 to 4 drivers). The estimator reports a 19.8-fold
 rise, steeper than geometric over the first two steps. All 400 founders had VAF > 0.4 at the first
-sample. Their fitted fitness (median 0.13, a quarter of the truth) is the birth-constraint floor of
-§3. One of the 400 fits failed (S062166, chi-square per observation about 6 × 10⁵); excluding it
+sample. Their fitted fitness (median 0.13, a quarter of the truth) sits near the birth-constraint
+boundary in this experiment (§3). One of the 400 fits failed (S062166, chi-square per observation about 6 × 10⁵); excluding it
 changes no median by more than 0.004. With the published $r=2.5$ (§2b) the estimator's ladder
 (0.23, 1.24, 2.33, 5.85) is also steeper at the first step than the truth (0.18, 0.57, 1.54, 3.93).
 
-So swept founders produce a steep first step whether or not drivers escalate. The test cannot be
-repeated on not-swept founders under $r=1$ (none of the 400 was), but in the published model the
-estimator recovers fitness well for not-swept founders (§2b2). The bias therefore concerns the
-real cases with swept founders (11 of 42 by first-sample VAF) and the 19 of 42 earliest clones
-fitted at the birth constraint (§2d; fitted fitness 0.05-0.21; 6 cases are in both groups). This
-is a statement about the paper's model in simulation; it does not validate the real ladder.
+In this experiment swept founders produced a steep fitted first step without built-in
+escalation. It is a sensitivity warning, not a general floor: under the published model the swept
+founders' fitted median was 0.23 against 0.18 true (§2b). No non-swept founder occurred among these
+400 $r=1$ cases, so that stratum was not tested under $r=1$; in the published model the estimator
+recovers fitness well for non-swept founders (§2b2). The concern applies to real cases with swept
+founder lineages (11 of 42 by first-sample VAF) and the 19 of 42 earliest clones fitted at the
+birth constraint (6 in both groups); a boundary estimate is not by itself a reason to discard it.
 
 ## 4. Smaller points
 
 - `figure5_pipeline.py` uses observed pattern counts 26/12/9; the paper reports 26/11/10.
   The `fig5e_pipeline.py` docstring quotes OR = 98.8 for Fig. 5f; the paper reports 107.
-- Fig. 5c compares with the average of male and female CRUK incidence; the cohort is women
-  (female cumulative risk to 85 is lower).
+- Fig. 5c compares with the average of male and female CRUK incidence while the cohort is women
+  (female cumulative risk to 85 is lower); whether that is an error depends on the intended target
+  population. This and the other points in this section are audit questions; the relevant pipelines
+  and clinical definitions are not reproduced here.
 - Fig. 5f counts any later myeloid leukaemia (ICD-10 C92, which includes CML) and hotspot sweeps
   that include JAK2 V617F; the Discussion reads it as AML risk.
 - The PPVs of Fig. 5e count AML before 85 in a model without other causes of death. Following the

@@ -43,11 +43,14 @@ post-mutation total to first order: $E[\sum_i n_i(t+h)]=\sum_i n_i\,(1+O(h^2\,\m
 (The total over a whole step also gains the newborn mutants of the mutation step.)
 
 *Proof.* $E[n_i(t+h)\mid\cdot]=n_i e^{(F_i-\bar x)h}$; multiply by $e^{\int_0^{t+h}\bar x}$. The
-post-selection total is $\sum_i n_i e^{(F_i-\bar x)h}
+conditional expected post-selection total is $\sum_i n_i e^{(F_i-\bar x)h}
 =\sum_i n_i\big(1+(F_i-\bar x)h+\tfrac12(F_i-\bar x)^2h^2+\dots\big)$, and the first-order term
 vanishes by the definition of $\bar x$. $\square$
 
-The deterministic skeleton therefore has the structure of the paper's inference model (Methods,
+By Jensen's inequality the conditional expected total is at least the post-mutation total, so
+selection inflates the population in expectation whenever fitness varies (besides the newborns);
+the simulation does not hold a fixed census size. The conditional-mean (mean-field) skeleton
+therefore has the structure of the paper's inference model (Methods,
 eqs. 1-2): wild type of constant unnormalised size, clones growing exponentially, frequencies by
 normalisation. The two differ near a clone's birth (the paper's $S(t)=(e^{s(t-t_0)}-1)/s$ against
 a random establishment factor times $e^{st}$) and in drift.
@@ -57,7 +60,9 @@ a constant $g>0$ is a Galton-Watson process with $\mathrm{Poisson}(m)$ offspring
 generation time $h$. It survives with probability $q(g)$, the root in $(0,1)$ of $1-q=e^{-mq}$
 (the positive root; $q=0$ is the other), and $q(g)=2gh\,(1+O(gh))$. Almost surely
 $n(t)e^{-gt}\to W$ (unconditional limit) with $E[W]=1$, $\{W>0\}=\{\text{survival}\}$, hence
-$E[W\mid\text{survival}]=1/q$.
+$E[W\mid\text{survival}]=1/q$. In the competitive model $g=F-\bar x(t)$ changes with time, so using
+$q$ as the establishment probability there is an approximation (survival of an auxiliary
+constant-environment process).
 
 *Proof.* Standard Galton-Watson theory: the extinction probability is the smallest fixed point of
 the offspring generating function $e^{m(z-1)}$, and $n_t/m^{t/h}$ is a non-negative martingale with
@@ -70,6 +75,7 @@ near-critical limit $gh\to 0$. The check below compares two moments of $\log(qW)
 validate the tails. *Numerical check* (`sim/wlaw.cpp`, 20,000 lineages per value):
 mean and s.d. of $\log(qW)$ against $\log X$ ($-0.577$, $1.283$): $g=0.16$: $-0.63$, $1.27$;
 $g=0.5$: $-0.56$, $1.23$; $g=1$: $-0.54$, $1.23$; $g=2.5$: $-0.51$, $1.21$; $g=4$: $-0.44$, $1.10$.
+The deviations at larger $gh$ are material; A1 is not validated for rare-event calculations.
 
 **Corollary 3 (the population scale is $N h$, not $N$; under Proposition 2 and A1).** For clones
 that are small compared with $N$ (so $\bar x\approx0$):
@@ -80,26 +86,25 @@ that are small compared with $N$ (so $\bar x\approx0$):
   which does not depend on $h$.
 
 These three rates, and the frequency threshold for AML, depend on $N$ and $h$ only through $Nh$
-up to $O(gh)$ corrections. That the model's outputs inherit this is not proved here; the table
-below tests it numerically.
+to leading order; finite-$h$ survival probabilities keep a separate dependence on $h$. That the
+model's outputs inherit the scaling is not proved here; the table below tests it numerically.
 
 *What $N\tau$ the code corresponds to.* The paper takes $N\tau\approx10^5$ from its refs 38, 39 and
-41 without fixing a convention, and two are in use there:
-- Ref 39 (Watson et al., Science 2020; bioRxiv 569566, Supplementary Note 2) defines the model by
-  per-cell rates: symmetric self-renewal at $\lambda r(1+s/2)$ and symmetric differentiation at
-  $\lambda r(1-s/2)$, with $1/\tau=\lambda r$. The drift variance is $2n/\tau$ per year and a new
-  clone survives with probability $q\approx s\tau$ (fitness $s$ per year). The Poisson update has
-  variance $n/h$ per year and $q\approx2sh$, so the code corresponds to $\tau=2h=0.2$ yr and
-  $N\tau=2\times10^4$. (That paper's text calls $1/\tau$ "the number of symmetric divisions per year",
-  while its rates give $2/\tau$; the value used here is the one fixed by its equations, $c=1$ and
-  $\tilde n=(e^{sT}-1)/s$.)
-- Refs 38 and 41 (Lee-Six et al. 2018, Mitchell et al. 2022) estimate $N\tau$ phylodynamically from
-  coalescence rates, i.e. as effective population size times generation time (50,000-250,000 in
-  adults). For the Poisson update the pairwise coalescence rate is $1/(Nh)$ per year, so in these
-  units the code has $N\tau=Nh=10^4$.
-So the code runs 5 (ref 39) to 10 (refs 38, 41) times below the stated scale. The stated
-$N\tau=10^5$ corresponds to $Nh=5\times10^4$ under ref 39's convention and to $Nh=10^5$ under the
-coalescent one.
+41. Ref 39 (Watson et al., Science 2020; bioRxiv 569566, Supplementary Note 2) fixes the
+normalisation by explicit per-cell rates: symmetric self-renewal at $\lambda r(1+s/2)$ and symmetric
+differentiation at $\lambda r(1-s/2)$, with $1/\tau=\lambda r$. The drift variance is $2n/\tau$ per
+year and a new clone survives with probability $q\approx s\tau$ (fitness $s$ per year). The Poisson
+update has variance $n/h$ per year and $q\approx2sh$, so the code corresponds to $\tau=2h=0.2$ yr and
+$N\tau=2\times10^4$, five times below the stated value; the stated value corresponds to
+$Nh=5\times10^4$. (That paper's text calls $1/\tau$ "the number of symmetric divisions per year",
+while its rates give $2/\tau$; the value used here is the one fixed by its equations, $c=1$ and
+$\tilde n=(e^{sT}-1)/s$.) Refs 38 and 41 estimate $N\tau$ phylodynamically from coalescence rates;
+the quoted excerpts do not fix the factor-of-two normalisation, and a binary self-renewal model
+with self-renewal rate $1/\tau$ has pairwise coalescence rate about $2/(N\tau)$, which matched to the
+Poisson update's $1/(Nh)$ again gives $\tau=2h$. (An earlier version of this note claimed a separate
+tenfold gap in "coalescent units"; that was not established and is withdrawn.) Ref 39 writes
+$\theta=2N\tau\mu$ with a haploid mutation rate, whereas the paper's Discussion writes
+$\theta=N\tau\mu$; comparing them needs an explicit mutation-rate convention.
 
 *Numerical* (`runs/ndt/`): lifetime AML risk to age 85
 
@@ -108,17 +113,18 @@ coalescent one.
 | $10^5$ | 0.1 | $10^4$ | 0.464% (published setting) |
 | $5\times10^5$ | 0.02 | $10^4$ | 0.536% |
 | $10^5$ | 0.05 | $5\times10^3$ | 0.146% |
-| $5\times10^5$ | 0.1 | $5\times10^4$ | 6.6% (stated $N\tau$, ref-39 convention; 20,000 lives) |
-| $10^6$ | 0.1 | $10^5$ | 16.0% (stated $N\tau$, coalescent convention; 4,000 lives) |
+| $5\times10^5$ | 0.1 | $5\times10^4$ | 6.6% (stated $N\tau$ in ref-39 units, other parameters unchanged; 20,000 lives) |
+| $10^6$ | 0.1 | $10^5$ | 16.0% (sensitivity run; 4,000 lives) |
 
-At fixed $Nh$ the risk changes by 15% over a fivefold change of $h$ (the residual $O(gh)$
-discretisation effect at the large fitness values of late clones). At the stated $N\tau=10^5$ the
-model gives a lifetime risk of 6.6% (ref-39 convention) or 16% (coalescent convention), 14 to 34
-times the observed 0.48%.
+At fixed $Nh$ the risk changes by 15% over a fivefold change of $h$ (finite-step effects; not
+attributed to a specific mechanism). At the stated $N\tau=10^5$ in ref-39 units, with all other
+parameters unchanged, the model gives a lifetime risk of 6.6%, 14 times the observed 0.48%.
+Whether the model retuned at the stated scale reproduces incidence and the paper's other outputs
+is examined in §8.
 
 ## 2. Acquisition ages
 
-**Proposition 4 (what the fitted establishment time measures; under A1).** Fit the paper's deterministic
+**Proposition 4 (the own-size establishment time; under A1).** Fit the paper's deterministic
 size $S(t)=(e^{s(t-t_0)}-1)/s$ against a population of $N_{\rm inf}=10^5$ to a clone that in
 truth was founded at $t_m$ and grows at rate $s$ relative to the background, with
 $n(t)\approx X e^{s(t-t_m)}/q(s)$ in a population of $N$ cells. Matching the exponential phases
@@ -126,10 +132,13 @@ gives
 $$t_0=t_m-\frac{1}{s}\Big[\log X+\log\frac{s N_{\rm inf}}{q(s)N}\Big]
 \;\approx\;t_m-\frac{1}{s}\Big[\log X+\log\frac{N_{\rm inf}}{N\tau}\Big]$$
 with $q(s)\approx s\tau$ in the convention of ref 39 (in the code $\tau=2h$, so $N\tau=2\times10^4$),
-and the reported "establishment time" (deterministic size reaches one cell) is
-$t_e=t_0+\log(1+s)/s$. Since $-\log X$ is Gumbel distributed with mean $\gamma=0.577$ and
+and define the own-size time (deterministic size reaches one cell)
+$\tilde t_e=t_0+\log(1+s)/s$. (The paper's reported `establishment_time` is a different quantity:
+the first time the clone's normalised frequency $S_i/(N_{\rm inf}+\sum_jS_j)$ reaches $1/N_{\rm inf}$,
+i.e. $S_i\ge(N_{\rm inf}+\sum_{j\ne i}S_j)/(N_{\rm inf}-1)$; the two agree only when other clones are
+negligible at that time, and differ for daughters growing inside large ancestors.) Since $-\log X$ is Gumbel distributed with mean $\gamma=0.577$ and
 variance $\pi^2/6$:
-$$E[t_e-t_m]=\frac{\gamma-\kappa+\log(1+s)}{s},\qquad \mathrm{sd}(t_e-t_m)=\frac{\pi}{\sqrt6\,s}\approx\frac{1.28}{s},
+$$E[\tilde t_e-t_m]=\frac{\gamma-\kappa+\log(1+s)}{s},\qquad \mathrm{sd}(\tilde t_e-t_m)=\frac{\pi}{\sqrt6\,s}\approx\frac{1.28}{s},
 \qquad \kappa=\log\frac{N_{\rm inf}\,s}{q(s)\,N}\approx\log\frac{N_{\rm inf}}{N\tau}.$$
 
 *Proof.* Equate $e^{-st_0}/(sN_{\rm inf})$ with $X e^{-st_m}/(q(s)N)$; use $q(s)\approx s\tau$
@@ -139,18 +148,24 @@ Consequences.
 - Proposition 4 averages over $X$ for a clone with a given founding time. In samples selected on
   the trajectory (for example AML cases whose founder is still small years before diagnosis) the
   selection acts on $X$; the simulation tests in `notes/recheck.md` §2b2 show this.
-- For an unselected clone the spread $1.28/s$ does not shrink with more data: it is the
-  unobservable luck of the clone's first few divisions (13 years at $s=0.1$/yr). After selection
-  on the trajectory both the offset and the spread change, so $1.28/s$ is not a universal error.
-- The offset depends on the population scale. In the code's own model ($\kappa=\log 5$) reported
-  ages are on average $(\log 5-\gamma-\log(1+s))/s$ too early: 9.4 years at $s=0.1$, 2.6 years at
-  $s=0.3$. At the stated $N\tau=10^5$ they are too late by $(\gamma+\log(1+s))/s$ under ref 39's
-  convention ($\kappa=0$: 6.7 and 2.8 years) or by $(\gamma+\log2+\log(1+s))/s$ under the coalescent
-  convention ($\kappa=-\log2$: 13.7 and 5.1 years).
+- For an unselected clone observed only in its later exponential phase, the spread $1.28/s$ does not
+  shrink with more such data: it is the luck of the clone's first few divisions (13 years at
+  $s=0.1$/yr). Earlier observations or other information on founding could reduce it. After
+  selection on the trajectory both the offset and the spread change, so $1.28/s$ is not a universal
+  error for the paper's reported ages.
+- The offset of $\tilde t_e$ depends on the population scale. In the code's own model
+  ($\kappa=\log 5$) it is on average $(\log 5-\gamma-\log(1+s))/s$ too early: 9.4 years at $s=0.1$,
+  2.6 years at $s=0.3$. At the stated $N\tau=10^5$ in ref-39 units ($\kappa=0$) it is too late by
+  $(\gamma+\log(1+s))/s$: 6.7 and 2.8 years. These are statements about the surrogate $\tilde t_e$,
+  not general corrections to the paper's reported times.
 - Posterior of the true founding age given $(s,t_0)$, with constant first-driver supply (uniform
-  prior on $t_m\ge0$): $t_m=t_0+(L+\kappa)/s$ with $L=\log X$ truncated to $t_m\ge 0$. For a
-  daughter founded inside a parent of fitness $s_p$ the prior is $\propto e^{s_p t_m}$, which turns
-  $e^{L}$ into a $\mathrm{Gamma}(1+s_p/s)$ variable.
+  prior on $t_m\ge0$) and the simplified observation equation above: $t_m=t_0+(L+\kappa)/s$ with
+  $L=\log X$ truncated to $t_m\ge 0$. For a daughter founded inside a parent of fitness $s_p$, taking
+  an exponential intensity prior $\propto e^{s_p t_m}$ turns $e^{L}$ into a $\mathrm{Gamma}(1+s_p/s)$
+  variable; for the first daughter event the prior also carries a survival factor
+  $\exp[-\int^{t_m}\lambda]$, and selection on AML ancestry and parent-birth times restrict it further.
+  The expected counts in `notes/recheck.md` §2a rest on these simplifications and are not calibrated
+  estimates for the real cohort.
 
 ## 3. When was the first driver acquired?
 
@@ -158,8 +173,8 @@ Consequences.
 the points of a Poisson process of constant rate $\Lambda$ on $[0,\infty)$, and (B) the lineage
 founded at $u$ causes diagnosis at $u+\theta$, where the $\theta$'s are i.i.d., independent of the
 founding times, with defective distribution function $D$ ($D(0)=0$), absolutely continuous with
-density $D'$ (for atomic delays the statements hold with $h'(T-u)\,du$ read as the measure
-$\Lambda\,dD(T-u)$). Let diagnosis be the first completion. Then the diagnosis hazard is $h(T)=\Lambda D(T)$, and given diagnosis at age $T$ the
+density $D'$. (For general $D$ the delay given diagnosis at $T$ has law $dD(v)/D(T)$ with $u=T-v$,
+and $P(u\le x\mid T)=1-h((T-x)^-)/h(T)$ with a left limit.) Let diagnosis be the first completion. Then the diagnosis hazard is $h(T)=\Lambda D(T)$, and given diagnosis at age $T$ the
 founding age $u$ of the diagnosing lineage has density
 $$f(u\mid T)=\frac{h'(T-u)}{h(T)},\quad 0\le u\le T;\qquad
 E[u\mid T]=\frac{H(T)}{h(T)},\qquad P(u\le x\mid T)=1-\frac{h(T-x)}{h(T)},$$
@@ -179,7 +194,9 @@ Here a "founder" is a first-driver mutation whose clone survives drift, and $u$ 
 that mutation. In the simulation model (A) holds approximately: established founders arrive at
 rate $U\,n_w(t)\,E[q(s-\bar x(t))]$, which is constant while the wild type $n_w\approx N$ and
 $\bar x\approx0$, and falls once the person's mutant clones expand. (B) holds up to competition
-between lineages of the same person; nothing in the model depends on age.
+between lineages of the same person; nothing in the model depends on age. The assumptions imply a
+non-decreasing hazard $h=\Lambda D$; they are substantive restrictions, not consequences of
+age-homogeneous rules alone.
 
 *Numerical check* (`analysis/firstdriver_law.py`, 928 simulated cases; $h$ estimated from the
 simulated diagnosis ages by a kernel estimate reflected at 85): law vs. simulation,
@@ -191,14 +208,14 @@ Applied to UK incidence (CRUK rates used in the paper's Fig. 5c), for a woman di
 $P(u\le 20)=0.74$, $E[u]=14$-$16$ years (female rates; 0.82 and 12-13 years with male rates).
 
 Consequences.
-- The paper's Fig. 4b statement (first driver by age 20 in two thirds of cases) is what any
-  model satisfying (A) and (B) and calibrated to the incidence curve predicts. It is a
-  consistency check, not independent support for the specific model.
-- The paper's own simulation, whose incidence is zero before 40 and therefore steeper, predicts
-  93%. Applied to simulated cases from that model with the real proportion of swept founders, the
-  trajectory estimator would report about 66% where the truth is about 87% (`notes/recheck.md`
-  §2b2). The 68% read from the real trajectories is in line with the model, but it understates
-  early founding; Proposition 5 gives the founding-age law directly from the incidence curve.
+- The paper's Fig. 4b statement (first driver by age 20 in two thirds of cases) is about what any
+  model satisfying (A) and (B) and calibrated to the incidence curve predicts. Agreement supports
+  the model class; it does not discriminate the paper's specific mechanism from others in that
+  class. The value at diagnosis age 72 is not the average over the cohort's diagnosis ages.
+- The paper's own simulation, whose incidence is near zero before 40 and therefore steeper,
+  predicts 93%. In simulated cases from that model the trajectory estimator under-reports early
+  founding (`notes/recheck.md` §2b, §2b2); this is a statement about the tested designs, not a
+  calibration of the paper's 68%.
 
 ## 4. Stage structure of the AML lineage
 
@@ -214,16 +231,19 @@ subtrees as independent given $W$. With A1 the
 probability $G_k(a\mid F)$ that an established $k$-driver clone of fitness $F$ yields AML within
 time $a$ satisfies, exactly under these assumptions,
 $$G_k(a\mid F)=\frac{X_k(a)}{q(F)+X_k(a)},\qquad X_k(a)=U\!\int_0^a e^{Fv}\,E_s\big[q(F+s)\,G_{k+1}(a-v\mid F+s)\big]dv,$$
-$G_4(a\mid F)=\exp(-q(F)N e^{-Fa})$, and $h(T)=NU\,E_s[q(s)G_1(T\mid s)]$, because
-$E[e^{-WB}]=q/(q+B)$ for $W\sim\mathrm{Exp}(q)$. The 2nd-driver waiting time in this regime is
-log-logistic in $e^{F_1t}$: $P(\tau_2>t)=\big(1+U Q_2 (e^{F_1t}-1)/(q(F_1)F_1)\big)^{-1}$ with
-$Q_2=E_s[q(F_1+s)]$, independent of $h$. Result (`sim/theory_branch.cpp`): lifetime risk 4.98%,
-ten times the simulation. Saturation of the parent clone controls the later stages, as the stage
-statistics above show.
+with the terminal proxy $G_4(a\mid F)=\exp(-q(F)N e^{-Fa})=P(n_4(a)>N)$, and
+$h(T)=NU\,E_s[q(s)G_1(T\mid s)]$, because $E[e^{-WB}]=q/(q+B)$ for $W\sim\mathrm{Exp}(q)$. The proxy is
+not the model's AML event: with wild type and ancestors retained, the half-population criterion is
+$n_4>N+\sum_{j\ne4}n_j$ (for a fixed total it would be $n_4>N/2$). The 2nd-driver waiting time in
+this regime satisfies $P(\tau_2>t)=\big(1+U Q_2 (e^{F_1t}-1)/(q(F_1)F_1)\big)^{-1}$ with
+$Q_2=E_s[q(F_1+s)]$, i.e. $e^{F_1\tau_2}-1$ is log-logistic; it is independent of $h$ only to
+leading order ($q\approx2Fh$). Result (`sim/theory_branch.cpp`): lifetime risk 4.98%, ten times the
+simulation. The stage statistics above point to saturation of parent clones, but the tenfold gap
+mixes several approximations and the terminal proxy and does not isolate that cause.
 
 **Approximation A3 (single lineage, deterministic growth).** Keep drift only at establishment
-(Proposition 2, A1), let all established clones follow the exact mean dynamics of
-Proposition 1, and let only the newest clone of one lineage produce daughters. Result
+(Proposition 2, A1), let all established clones follow the conditional-mean (mean-field) dynamics
+of Proposition 1, and let only the newest clone of one lineage produce daughters. Result
 (`sim/theory_reduced.cpp`, $3\times10^6$ lineages): lifetime risk 0.371% (simulation 0.464%),
 mean founding ages of drivers 1-4: 8.2, 37.4, 58.2, 70.9 (simulation 8.1, 38.1, 59.9, 72.4).
 Adding the person's other first-driver clones as inert competitors: 0.365% (mean founding ages
@@ -234,72 +254,78 @@ first-driver clones as inert competitors changes it by under 2%; other competiti
 daughters, off-trunk subclones) is not tested. Conjecture, not tested: the remaining 20% comes
 from the restriction that only the newest clone of the lineage founds daughters.
 
-Stage durations in the dominance regime follow from A1 and Proposition 1: a clone with increment
-$s_k$ over a dominant parent sweeps in $(\log(Nq(s_k))-\log X)/s_k$ years, and new drivers arrive
-at rate $\approx UN\,E[q(s)]$. With the conditioned increments $s_3\approx1.0$, $s_4\approx2.5$
-this gives $\approx 21$, $12$ and $4.2$ years for the gaps between drivers 2-3, 3-4 and 4-diagnosis
-(simulation medians 21.1, 11.9 and 4.4).
+In a two-type dominance approximation (A1 and Proposition 1), a clone with increment $s_k$ over a
+dominant parent reaches half frequency about $(\log(Nq(s_k))-\log X)/s_k$ years after founding. An
+earlier version derived stage durations (21, 12, 4.2 years) from this by inserting conditioned
+increments into the at-birth arrival rate $UN\,E[q(s)]$; that substitution is not justified, and
+those figures are withdrawn. The simulated medians are 21.1, 11.9 and 4.4 years.
 
 ## 5. Fitness of the drivers on the path to AML
 
 *Numerical.* Conditioned on AML, the increments of drivers 1-4 have medians 0.176, 0.40, 1.00,
-2.50: the scales $a_k$ of the input distributions, about twice their unconditional means (0.089,
+2.50: near the scales $a_k$ of the input distributions, about twice their unconditional means (0.089,
 0.223, 0.557, 1.394). Clone fitness rises 0.18, 0.57, 1.54, 3.93 (ratios 3.2, 2.7, 2.6).
 
 *Reason.* Conditioning on completing four stages within a lifetime tilts each increment's law by
 a completion probability that rises steeply with $s$. For the light-tailed input
 $\rho_a\propto e^{-(s/a)^3}$ the tilted law concentrates near the top of the input's bulk, at a
-fixed multiple of $a$. The conditioned fitness ladder therefore reproduces the assumed ratio
-$r=2.5$ between stage scales. The model reproduces Fig. 4c's geometric pattern because $r$ was
-chosen to; the agreement does not test the geometric hypothesis.
+fixed multiple of $a$. The geometric escalation is therefore imposed by the input scales: even
+before conditioning, expected cumulative fitness is proportional to $(r^k-1)/(r-1)$, whose
+successive ratios approach $r$ (not exactly $r$, especially at the first step). Calibrating a model
+that contains this assumption is legitimate, and quantitative agreement can test other aspects of
+it, but the model's geometric ladder is an input rather than an independent prediction.
 
 *Null model* (`runs/null/`): $r=1$, with $s_1=0.5$ chosen to match incidence (0.515% to 85,
 1031 cases in 200,200 lives). Conditioned increments: medians 0.55, 0.50, 0.50, 0.55, i.e. the
 common input scale at every stage. Clone fitness: 0.55, 1.05, 1.60, 2.15 (ratios 1.9, 1.5, 1.3),
-an additive ladder. Conditioning on AML does not create a geometric ladder; in the published model
-it comes from $r$. Median founding ages of drivers 1-4: 4.6, 25.0, 44.0, 62.0 (published model:
+an additive ladder. In this model, conditioning on AML does not create a geometric ladder; that does
+not show it could never do so under other distributions or sampling schemes. Median founding ages of drivers 1-4: 4.6, 25.0, 44.0, 62.0 (published model:
 6.0, 39.1, 61.1, 74.1).
 
 ## 6. Late evolution
 
-The pattern "late" requires the first driver's lineage to stay below 0.2% of cells
-($M=200$ cells) until two years before diagnosis, and its 4-driver clone to exceed 50% at
+The pattern "late" requires the first driver's lineage to stay below 0.2% of cells (about
+$M=200$ cells; the classifier uses 0.2% of a changing population) until two years before diagnosis, and its 4-driver clone to exceed 50% at
 diagnosis. Heuristically, with deterministic exponential growth, growing by a factor $\ge 250$ in
 two years takes a growth rate above $\log 250/2=2.8$/yr, i.e. at least a 3-driver clone, so drivers
 2 and 3 (and in practice 4) would have to be established while the lineage has at most $M$ cells.
-The Poisson updates have unbounded upward fluctuations, so this is not a necessary condition for
-the stochastic model; it motivates H4.
+This is not a necessary condition for the stochastic model: Poisson updates have unbounded upward
+fluctuations, and later drivers can also arise after the lineage crosses the threshold and still
+complete quickly.
 
-**Heuristic H4 (first-moment estimate, not a bound).** A clone of fitness $F$ founds established daughters of
+**Heuristic H4 (illustrative restricted-path calculation; not a quantitative estimate).** A clone of fitness $F$ founds established daughters of
 fitness $F'$ during the time it has at most $M$ cells at expected number
 $\approx U\,q(F')\,M/F\approx 2hUM\,F'/F$. Chaining stages 2-4 and integrating over first
 drivers ($q(F_1)\approx 2hF_1$ cancels the $1/F_1$):
 $$\Lambda_{\rm late}\approx NU\,(2h)^4\,U^3M^3\,E[F_4]\approx 3\times10^{-11}\ \text{per year},$$
 (with $NU=1$, $(2h)^4=1.6\times10^{-3}$, $(UM)^3=8\times10^{-9}$, $E[F_4]\approx2.3$), about
-$2.5\times10^{-9}$ per lifetime, against an AML risk of $4.6\times10^{-3}$. The expected number of
-late cases in 200,200 simulated lives is about $5\times10^{-4}$, consistent with 0 of 943. The
-observed 10 of 47 (about $10^{-3}$ lifetime risk) would, by this heuristic, need a second channel
-about $4\times10^5$ times larger: for example single events that confer more than about 3/yr directly in wild-type cells,
-or drivers outside the sequencing panel. H4 replaces stochastic occupancy times by $M/F$ and
-chains first moments, so it is an order-of-magnitude estimate, not an upper bound.
+$2.5\times10^{-9}$ per lifetime. This product does not enforce the joint event that the whole lineage
+stays below threshold and then completes within two years, contains no two-year completion
+constraint, ignores paths through transient genotypes and later drivers arising after the
+threshold crossing, and replaces stochastic occupancy by $M/F$. Its approximation error is
+unknown, and it is not an estimate of the model's late rate. (An earlier version derived from it a
+$4\times10^5$-fold gap and a required second channel of that size; withdrawn. Zero events in
+200,200 simulated lives cannot validate a probability near $10^{-9}$.)
 
 *Statistical statement* (no approximation): the simulation gives 0 late cases among 928 AML cases
 (published: 0 of 943). The exact 95% upper bound on the model's late fraction is 0.40% of AML cases
 (two-sided Clopper-Pearson; 0 of 200,200 lives: about $1.84\times10^{-5}$ per life). The observed
-fraction is 10/47, two-sided 95% interval 10.7%-35.7%. The separate endpoints differ by about
-27-fold (26.98). A jointly calibrated conservative statement (Bonferroni, each interval at
-97.5%: model upper 0.47%, observed lower 9.6%) gives a ratio of at least 20 with 95% confidence.
-Assumptions: independent cases; simulated and real cases classified comparably. The factor
-$4\times10^5$ above is the heuristic's estimate of the gap.
+fraction is 10/47, two-sided 95% interval 10.7%-35.7%. Each interval fails on its relevant side
+with probability at most 2.5%, so the endpoint ratio, about 27 (26.98), is a joint 95% lower
+confidence bound on the ratio of late fractions (the Bonferroni construction at 97.5% each, giving
+20, is valid but more conservative). Assumptions: independent cases; simulated and real cases
+classified comparably. Comparability needs an observation model: the simulation classifies on the
+complete first-driver lineage trajectory and its first-ever threshold crossing, the real data on
+sparse samples and a finite panel, where an unobserved initiating driver can produce an apparent
+late pattern without a separate biological mechanism.
 
 ## 7. Positive predictive value of sweeps
 
-For a person who at age $a$ carries a clone with $k$ drivers at frequency $f$, the probability of
-AML before the horizon $T_h$ is the completion probability of the rest of the lineage within
-$T_h-a$ (the single-lineage reduction of §4). The PPV of Fig. 5e is this probability averaged over
-everyone who meets the criterion at age $a$. It therefore falls with age for two reasons: less
-time remains before the horizon, and the pool meeting the criterion grows with age and contains
-more slow clones.
+The PPV of Fig. 5e averages, over everyone meeting the criterion at age $a$, the probability of AML
+before the horizon. That probability depends on the person's whole clonal state (fitnesses and
+other clones), not only on the number of drivers and the frequency. Less remaining time pushes the
+pooled PPV down, but the composition of the eligible pool also changes with age, so a decline is
+not forced mathematically; the table below establishes it in the model.
 
 *Numerical* (`runs/horizon/`, the same 200,200 simulated lives followed to 100 instead of 85; the
 lives are identical up to 85 because each life has its own random stream). PPV of "largest VAF
@@ -312,8 +338,8 @@ lives are identical up to 85 because each life has its own random stream). PPV o
 | 60 | 553/1204 = 46% | 962/1204 = 80% |
 | 70 | 733/3422 = 21% | 2117/3422 = 62% |
 
-Without death from other causes, a person meeting the criterion at 70 usually progresses, but
-after 85. The model has no competing mortality, so the 85-year cut-off acts as a crude stand-in
+Without death from other causes, 62% of those meeting the criterion at 70 are diagnosed by 100,
+40.4 points of them between 85 and 100: most progressors by 100 progress after 85. The model has no competing mortality, so the 85-year cut-off acts as a crude stand-in
 for it. Weighting each simulated AML by the probability of surviving other causes from the
 screening age $a$ to diagnosis, $S(T)/S(a)$ (the person is alive at screening; other-cause death
 assumed independent of the clone dynamics; Gompertz mortality $\mu(x)=Ae^{Bx}$, $A$ set so that life expectancy at 70 is 16.5
@@ -325,6 +351,26 @@ diagnosed by 100 bounds the omitted tail below 2.6 points in all three scenarios
 assumptions; checked independently by yang2). Under this
 mortality scenario the PPV declines with age much as published; the cut-off is a reasonable proxy,
 slightly too generous before 60 and too strict at 70.
+
+## 8. Re-tuning at the stated scale
+
+Question (raised by the Pro review): does the scale mismatch of Corollary 3 change the model's
+outputs, or only its labels? Set $N=5\times10^5$, $h=0.1$ (the stated $N\tau=10^5$ in ref-39 units)
+and re-tune one other parameter to the observed lifetime risk (`runs/retune/`,
+`runs/retune/compare_*.txt`, 200,200 lives each).
+
+| run | lifetime risk | patterns lin/branch/late | median driver ages 1-4 | conditioned clone fitness | PPV 40/50/60/70 |
+|---|---|---|---|---|---|
+| published ($Nh=10^4$, $U=10^{-5}$, $s_1=0.16$) | 0.464% | 69/31/0% | 6.0, 39.1, 61.1, 74.1 | 0.18, 0.57, 1.54, 3.93 | 89, 72, 46, 21% |
+| stated scale, $U=3.8\times10^{-6}$ | 0.496% | 66/34/0% | 5.4, 39.8, 61.9, 74.2 | 0.19, 0.60, 1.59, 4.12 | 100, 94, 61, 26% |
+| stated scale, $s_1=0.1165$ | RESULT_S1 |
+
+The incidence shape (ratio to the CRUK male-female average at 60-64, 70-74, 80-84: 0.41, 0.93, 1.50
+published; 0.41, 0.90, 1.67 re-tuned in $U$) is similar. So the main outputs do not depend on the
+scale once one other parameter is re-tuned: the mismatch is an inconsistency between stated and
+simulated parameters, not a change in the model's qualitative behaviour. The sweep PPVs do change,
+because at the larger scale fewer people reach the sweep criterion at a given age (24 and 142
+qualifying at 40 and 50 against 56 and 303), and those who do are more advanced.
 
 ## Files
 
