@@ -27,9 +27,11 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    approximate 95% profile-likelihood intervals for reported ages, with the quasi-binomial
    correction for the measured overdispersion (Pearson dispersion 3.1), have median width 51 years,
    against 7 years for the published ranges; 144 of 156 case clones are wider. These intervals are
-   themselves approximate and, on simulated data with known truth, cover less than 95% (fitness:
-   68% for single-driver clones, 91-97% for later ones; founding time: 52-86%), so honest
-   intervals would be wider still (§2c).
+   themselves approximate: on simulated data with known truth their fitness intervals cover the
+   true fitness for 68% of single-driver clones and 91-97% of later ones, below the nominal 95%
+   (§2c). Read as intervals for the true founding time, a different estimand from the fitted
+   $t_e$, they cover 52-86%; that is a diagnostic of using them for that purpose, not a coverage
+   audit of $t_e$.
 4. **The "first driver by age 20 in two thirds of cases" statement is not supported case by
    case, and the incidence curve predicts it anyway.** In the re-fit, the maximum-likelihood
    founding of 19 of 42 earliest clones sits on the constraint "founded at or after birth"; for 33
@@ -41,8 +43,9 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    the founder's VAF is flat near 0.5 throughout (for example C92_019, C92_023, C92_024, C92_034),
    the data say little about its fitness and age; the fit lands on the birth constraint, at about
    the smallest fitness that completes a sweep by the first sample when starting at birth.
-5b. **Under the paper's own model, the estimator's first-driver ages are unbiased in the median
-   but very imprecise, and it misses early founding.** Simulated AML cases matched to the real
+5b. **Under the paper's own model, the estimator's first-driver ages show an observed median
+   error of +0.2 years in the matched simulation, with wide errors, and it misses early
+   founding.** Simulated AML cases matched to the real
    stratum (founder not swept at the first sample, 272 cases): founding-age error median +0.2
    years, s.d. 18; reported "first driver by 20" 70% against a true 84%. Swept founders (95% of
    simulated cases, 11 of 42 real ones; 874 simulated): error mean +15 years, reported 56%
@@ -64,9 +67,12 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    increments sit at the input scales $a_k=s_1r^{k-1}$, so the model's agreement with Fig. 4c
    reproduces the assumed $r=2.5$ rather than testing it (§3b, theory note §5).
 7. **The model essentially never produces late evolution.** No late case among 928 simulated AML
-   cases (published: 0 of 943) gives an exact 95% upper bound of 0.40% of AML cases; the observed
-   fraction is 10/47 (exact 95% interval 10.7-35.7%), at least 27 times higher. A first-moment
-   heuristic puts the gap near $4\times10^5$; that figure is an estimate, not a bound (theory §6).
+   cases (published: 0 of 943): two-sided 95% Clopper-Pearson upper end 0.40% of AML cases. The
+   observed fraction is 10/47, two-sided 95% interval 10.7-35.7%. The separate interval endpoints
+   differ by about 27-fold; a jointly calibrated conservative statement (Bonferroni, each
+   interval at 97.5%) gives a ratio of at least 20 with 95% confidence. This assumes independent
+   cases and comparable classification of simulated and real cases. A first-moment heuristic puts
+   the gap near $4\times10^5$; that figure is an estimate, not a bound (theory §6).
 8. **The PPV decline with age stands.** The 85-year cut-off is a crude proxy for death from other
    causes; under an explicit competing-mortality scenario the PPVs are close to the published ones
    (§4 below). An earlier draft of this note called the decline an artefact of the cut-off; that
@@ -96,11 +102,16 @@ incidence fit, the pattern fractions and the PPVs of Fig. 5 all come from the $N
 
 Reported "occurrence time" is $t_e=t_0+\log(1+s)/s$, the age at which the fitted deterministic
 clone size equals one cell (Figure_4.ipynb uses `establishment_time`). Under the paper's own
-stochastic model:
+stochastic model, with the exponential-establishment approximation A1, for a clone of known
+fitness $s$ fitted in its exponential phase and not selected on its trajectory:
 - spread: s.d. of $t_e-t_m$ is $1.28/s$, independent of sequencing depth or sample count;
 - offset: at the code's $N\tau=10^4$ reported ages are too early by
   $(\log5-\gamma-\log(1+s))/s$ (9.4 years at $s=0.1$, 2.6 at $s=0.3$); at the stated $N\tau=10^5$
   too late by $(\gamma+\log2+\log(1+s))/s$ (13.7 and 5.1 years).
+
+Real cases are selected (they are AML cases, observed in a window) and $s$ is estimated, so they do
+not inherit this error law; the simulation tests in §2b and §2b2 show both offset and spread
+changing under that selection.
 
 Applied to the published estimates (`analysis/ages.py`; earliest clone per case, the Fig. 4b
 rule): reported $t_e\le20$ in 32 of 42 fitted cases (32/47 = 68%, the paper's "two thirds").
@@ -187,8 +198,9 @@ with the binomial threshold (1.92) and the quasi-binomial threshold $1.92\phi$.
 
 Results (`runs/refit/full/eval.txt`, 42 cases, 33 controls, 222 clones):
 - Pooled Pearson dispersion of the detected read counts: $\phi=3.06$ (1 under the binomial
-  model). Year-to-year variation is three times the sampling noise the likelihood assumes, so
-  binomial intervals are too narrow by a factor $\sqrt{3}$ even before identifiability problems.
+  model). Year-to-year variation is three times the sampling noise the likelihood assumes. Under
+  regular, local conditions this would make binomial intervals too narrow by about $\sqrt{3}$;
+  near boundaries and under weak identification the factor is not reliable.
 - Width of the 95% interval for $t_e$: median 51 years (cases) and 53 years (controls), against
   published optimiser ranges of 7 and 4.4 years.
 - The age interval reaches the birth constraint ($t_0=0$, within 0.3 yr) for 77 of 156 case
@@ -199,12 +211,13 @@ Results (`runs/refit/full/eval.txt`, 42 cases, 33 controls, 222 clones):
 - Coverage of these intervals on simulated cases with known truth (`runs/coverage/eval.txt`; 150
   cases of the matched stratum of §2b2, the paper's model, nominal 95%, simulated dispersion 1.16):
   fitness intervals contain the true clone fitness for 68% of single-driver clones and 93%, 91%,
-  97% of 2-, 3-, 4-driver clones. Read as intervals for the true founding time, the $t_e$
-  intervals cover 86%, 83%, 52%, 59% (median widths 40, 21, 1.5, 2.9 years): $t_e$ is not the
-  founding time (Prop. 4), and for fast clones the interval is narrower than that gap. So these
-  intervals are themselves too narrow, most for single-driver fitness and late founding times. The
-  comparison with the published optimiser ranges holds a fortiori: an interval with nominal 95%
-  coverage would be at least as wide as these.
+  97% of 2-, 3-, 4-driver clones: undercoverage for single-driver fitness in this design. As a
+  diagnostic of reading the $t_e$ intervals as intervals for the true founding time (a different
+  estimand from the fitted deterministic $t_e$), they contain it for 86%, 83%, 52%, 59% of 1- to
+  4-driver clones (median widths 40, 21, 1.5, 2.9 years); for fast clones the interval is narrower
+  than the gap between $t_e$ and the founding time (Prop. 4). This is not a coverage audit of the
+  $t_e$ parameter itself. A calibrated interval could differ in centre and shape as well as width,
+  so these results do not imply an ordering of widths.
 - Published values lie inside the quasi intervals for 149/156 ages and 131/156 fitnesses. The
   point estimates are compatible with the data; their stated precision is not.
 - In 15 of 42 cases the published parameters are worse than the maximum-likelihood fit by more

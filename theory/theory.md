@@ -248,9 +248,11 @@ it comes from $r$. Median founding ages of drivers 1-4: 4.6, 25.0, 44.0, 62.0 (p
 
 The pattern "late" requires the first driver's lineage to stay below 0.2% of cells
 ($M=200$ cells) until two years before diagnosis, and its 4-driver clone to exceed 50% at
-diagnosis. Growing by a factor $\ge 250$ in two years needs a growth rate above
-$\log 250/2=2.8$/yr, i.e. at least a 3-driver clone, so drivers 2 and 3 (and in practice 4) must be
-established while the lineage has at most $M$ cells.
+diagnosis. Heuristically, with deterministic exponential growth, growing by a factor $\ge 250$ in
+two years takes a growth rate above $\log 250/2=2.8$/yr, i.e. at least a 3-driver clone, so drivers
+2 and 3 (and in practice 4) would have to be established while the lineage has at most $M$ cells.
+The Poisson updates have unbounded upward fluctuations, so this is not a necessary condition for
+the stochastic model; it motivates H4.
 
 **Heuristic H4 (first-moment estimate, not a bound).** A clone of fitness $F$ founds established daughters of
 fitness $F'$ during the time it has at most $M$ cells at expected number
@@ -260,16 +262,19 @@ $$\Lambda_{\rm late}\approx NU\,(2h)^4\,U^3M^3\,E[F_4]\approx 3\times10^{-11}\ \
 (with $NU=1$, $(2h)^4=1.6\times10^{-3}$, $(UM)^3=8\times10^{-9}$, $E[F_4]\approx2.3$), about
 $2.5\times10^{-9}$ per lifetime, against an AML risk of $4.6\times10^{-3}$. The expected number of
 late cases in 200,200 simulated lives is about $5\times10^{-4}$, consistent with 0 of 943. The
-observed 10 of 47 (about $10^{-3}$ lifetime risk) needs a second channel about $4\times10^5$ times
-larger: for example single events that confer more than about 3/yr directly in wild-type cells,
+observed 10 of 47 (about $10^{-3}$ lifetime risk) would, by this heuristic, need a second channel
+about $4\times10^5$ times larger: for example single events that confer more than about 3/yr directly in wild-type cells,
 or drivers outside the sequencing panel. H4 replaces stochastic occupancy times by $M/F$ and
 chains first moments, so it is an order-of-magnitude estimate, not an upper bound.
 
 *Statistical statement* (no approximation): the simulation gives 0 late cases among 928 AML cases
 (published: 0 of 943). The exact 95% upper bound on the model's late fraction is 0.40% of AML cases
-(0 of 200,200 lives: below $1.8\times10^{-5}$ per life). The observed fraction is 10/47, exact 95%
-interval 10.7%-35.7%. So the model's late fraction is at least 27 times below the lower end of
-the observed interval. The factor $4\times10^5$ above is the heuristic's estimate of the gap.
+(two-sided Clopper-Pearson; 0 of 200,200 lives: below $1.8\times10^{-5}$ per life). The observed
+fraction is 10/47, two-sided 95% interval 10.7%-35.7%. The separate endpoints differ by about
+27-fold (26.98). A jointly calibrated conservative statement (Bonferroni, each interval at
+97.5%: model upper 0.47%, observed lower 9.6%) gives a ratio of at least 20 with 95% confidence.
+Assumptions: independent cases; simulated and real cases classified comparably. The factor
+$4\times10^5$ above is the heuristic's estimate of the gap.
 
 ## 7. Positive predictive value of sweeps
 
