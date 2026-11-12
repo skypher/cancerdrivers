@@ -42,9 +42,14 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    15 years later than the truth (s.d. 24). The estimator reports "first driver by 20" for 57% of
    cases where the truth is 94%. Fitted fitness exceeds the truth by a median factor of 1.5 (1-, 3-
    and 4-driver clones) to 2.2 (2-driver clones).
-6. **The geometric fitness ladder does not test the model.** In the simulation the conditioned
-   increments sit at the input scales $a_k=s_1r^{k-1}$, so the ladder reproduces the assumed
-   $r=2.5$ (theory note §5).
+6. **The geometric fitness ladder (Fig. 4c) may be produced by the estimator.** Under a model
+   with no built-in escalation ($r=1$, calibrated to incidence), the true conditioned clone
+   fitness rises 3.9-fold from single to quadruple mutants, additively. The paper's estimator
+   applied to those simulated cases reports a 19.8-fold rise (0.13, 0.58, 1.94, 2.48 per year). The
+   main cause is the first step: a founder that swept before sampling is assigned roughly the
+   smallest fitness that could sweep from birth, about 0.13 per year, whatever its true value. In
+   the published model the conditioned increments sit at the input scales $a_k=s_1r^{k-1}$, so its
+   agreement with Fig. 4c reproduces the assumed $r=2.5$ (§3b, theory note §5).
 7. **The model cannot produce late evolution, by a factor of about $4\times10^5$** (theory note §6).
 8. **The PPV decline with age is mostly the 85-year horizon** of the simulation (§4 below).
 
@@ -155,6 +160,30 @@ lands at the corner $t_0=0$, $s\approx0.2$: in the re-fit C92_022 (0.21, $t_e$ 0
 these founders (C92_024: 0.208-0.277) come from the birth constraint, not from the data.
 Because daughters' absolute fitness equals the founder's plus the identified difference, the
 absolute fitness of every clone growing inside a swept founder inherits this indeterminacy.
+
+## 3b. Does the estimator manufacture the fitness ladder?
+
+Test (`runs/null/`): simulate the model with $r=1$ (every driver's increment from the same
+distribution, scale $s_1=0.5$, chosen so the lifetime risk is 0.51%), take 400 AML cases, and run
+the same estimator and design as in §2b.
+
+| drivers in clone | true conditioned fitness (median) | fitted (median) |
+|---|---|---|
+| 1 | 0.55 | 0.13 |
+| 2 | 1.05 | 0.58 |
+| 3 | 1.60 | 1.94 |
+| 4 | 2.15 | 2.48 |
+
+The truth is an additive ladder (3.9-fold from 1 to 4 drivers). The estimator reports a 19.8-fold
+rise, steeper than geometric over the first two steps. All 400 founders had VAF > 0.4 at the first
+sample. Their fitted fitness (median 0.13, a quarter of the truth) is the birth-constraint floor of
+§3. One of the 400 fits failed (S062166, chi-square per observation about 6 × 10⁵); excluding it
+changes no median by more than 0.004. With the published $r=2.5$ (§2b) the estimator's ladder
+(0.23, 1.24, 2.33, 5.85) is also steeper at the first step than the truth (0.18, 0.57, 1.54, 3.93).
+
+So a steep ladder in the trajectory fits is expected whether or not drivers escalate. Fig. 4c
+cannot distinguish $r=2.5$ from $r=1$ without a correction for this bias. In the real data,
+19 of 42 earliest clones sit on the birth constraint (§2d), with fitted fitness 0.07-0.21.
 
 ## 4. Smaller points
 

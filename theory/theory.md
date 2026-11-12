@@ -217,6 +217,13 @@ fixed multiple of $a$. The conditioned fitness ladder therefore reproduces the a
 $r=2.5$ between stage scales. The model reproduces Fig. 4c's geometric pattern because $r$ was
 chosen to; the agreement does not test the geometric hypothesis.
 
+*Null model* (`runs/null/`): $r=1$, with $s_1=0.5$ chosen to match incidence (0.515% to 85,
+1031 cases in 200,200 lives). Conditioned increments: medians 0.55, 0.50, 0.50, 0.55, i.e. the
+common input scale at every stage. Clone fitness: 0.55, 1.05, 1.60, 2.15 (ratios 1.9, 1.5, 1.3),
+an additive ladder. Conditioning on AML does not create a geometric ladder; in the published model
+it comes from $r$. Median founding ages of drivers 1-4: 4.6, 25.0, 44.0, 62.0 (published model:
+6.0, 39.1, 61.1, 74.1).
+
 ## 6. Late evolution
 
 The pattern "late" requires the first driver's lineage to stay below 0.2% of cells
