@@ -1,6 +1,7 @@
 # Draft email to the corresponding authors (not sent)
 
-To: Jamie Blundell, Caroline Watson (corresponding authors)
+To: Caroline J. Watson <cw672@cam.ac.uk>, Jamie R. Blundell <jrb75@cam.ac.uk> (corresponding authors,
+per the article's correspondence section)
 Subject: Questions on the simulation parameters and uncertainty estimates in "Evolutionary dynamics in the years preceding acute myeloid leukaemia" (Nature, 2026)
 
 Dear Dr Blundell and Dr Watson,
@@ -48,7 +49,8 @@ you could clarify. We may well have missed something, and we would welcome a cor
    follow routes outside the panel or the four-hit model, though other explanations remain possible,
    and we wondered whether you had considered adding such a route.
 
-Our notes and code are available if useful.
+Our notes and code are at https://github.com/skypher/cancerdrivers (notes/recheck.md,
+theory/theory.md).
 
 With best regards,
-[name]
+Leslie Polzer
