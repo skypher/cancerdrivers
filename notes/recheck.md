@@ -79,17 +79,21 @@ job_f9cc4981, gpt-6-pro); verdicts noted per item.
    depends on clone-selection and missing-driver assumptions** (Pro: holds with qualification;
    sensitivity analysis added 2026-11-12, §2e, reviewed by yang2 with fixes applied). Against the
    simulation's own classifier (complete lineage trajectories) the model gives 0 late cases in 928,
-   about 27 times below the observed 10/47 (21%, 95% interval 10.7-35.7%); that comparison is not like
-   for like. In a sensitivity analysis that samples the simulated cases on real schedules, detects at
+   and the former conditional confidence-endpoint comparison put it about 27 times below the observed
+   10/47 (21%, 95% interval 10.7-35.7%); that is not a like-for-like observation-model comparison. In a sensitivity analysis that samples the simulated cases on real schedules, detects at
    VAF 0.1% and treats some drivers as off-panel, the late fraction depends strongly on which lineage
    is taken as the pre-leukaemic clone (two artificial rules, neither established as the paper's
    classifier) and on the off-panel probability $p$: from 0% at $p=0$ to 0.15% (rule A) or 2.9%
    (rule B) at an illustrative $p\approx0.12$, and 2.0% or 16.5% at $p=0.3$ (the latter inside the
    observed interval). The scenarios do not identify a robust fold-gap. One comparison does not depend
-   on the choice of rule: cases with no visible trunk driver detected at all are at most 1.6% in the
-   model even at $p=0.3$, against 5 of 47 real cases (3.5-23.1%) with no panel driver. Under these
-   assumptions (independent misses, four trunk drivers) that points to a subset of AMLs with largely
-   undetectable routes, which is the paper's own suggestion and lies outside its published model.
+   on the choice of rule: at $p=0.3$ the estimated rate of cases with no detected trunk driver is
+   1.55% (case-bootstrap 95% interval 1.43-1.68%), and omitting off-trunk detections makes this an
+   estimated upper envelope for the model's no-panel-driver rate under these assumptions; the cohort
+   has 5 of 47 (3.5-23.1%). If classification and schedules are comparable, this suggests that the
+   specified scenarios (independent misses, four trunk drivers, $p\le0.3$) are inadequate. It is
+   consistent with largely undetectable routes (the paper's own suggestion, outside its published
+   model) but does not identify that explanation: correlated misses, other driver counts or types,
+   larger $p$ and detection or ascertainment differences remain possible.
 8. **The PPV decline with age stands** (Pro: holds). With explicit competing mortality the PPVs are
    close to the published ones (§4); an earlier draft calling the decline an artefact of the age-85
    cut-off was wrong. This shows robustness within the model and scenarios, not calibration of
@@ -357,15 +361,19 @@ $p=1-(28/47)^{1/4}=0.121$, with binomial range 0.074-0.184. Those assumptions ar
 missing driver is not a verified off-panel mutation, the number of drivers varies, inference is
 imperfect), so this is an illustrative range, not a calibration.
 
-What the analysis shows. (i) The simulation's own classifier and the paper's real-data
-classification are not comparable, so the 27-fold figure overstates the gap. (ii) For these 928
+What the analysis shows. (i) The 27-fold figure (the former conditional confidence-endpoint
+comparison) is not a like-for-like observation-model gap; these sensitivity scenarios can reduce or
+remove the apparent discrepancy. (ii) For these 928
 stored cases and the sampled schedules, sparse sampling and the detection limit gave no late cases
 when every driver was visible. (iii) With off-panel drivers the late fraction ranges from well below
 to within the observed interval, depending on the clone-selection rule and $p$; no robust fold-gap
-follows. (iv) The fraction of cases with no visible trunk driver at all stays at or below 1.6% up to
-$p=0.3$, against 5 of 47 real no-driver cases; since off-trunk clones are not counted here, this
-model figure is an upper bound on its no-driver rate. Under independent misses this suggests a subset
-of AMLs with largely undetectable routes (the paper's own explanation), outside the published model.
+follows. (iv) The estimated rate of cases with no detected trunk driver is 1.55% at $p=0.3$
+(case-bootstrap 1.43-1.68%) and lower for smaller $p$; omitting off-trunk detections makes it an
+estimated upper envelope for the no-panel-driver rate under the same assumptions. Against 5 of 47
+real no-driver cases this suggests the specified scenarios are inadequate if classification and
+schedules are comparable; it is consistent with largely undetectable routes (the paper's own
+explanation) but does not identify them. Zero-width bootstrap intervals at $p=0$ describe these 928
+stored cases, not zero population risk.
 Limits: depth noise and calling thresholds are not modelled beyond the 0.1% cut; the inputs and
 classifier have not been independently audited.
 

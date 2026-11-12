@@ -324,8 +324,8 @@ sparse samples and a finite panel, where an unobserved initiating driver can pro
 late pattern without a separate biological mechanism. A sensitivity analysis (`notes/recheck.md` §2e: real sampling schedules, 0.1% VAF detection,
 off-panel drivers, two artificial clone-selection rules) reduces the apparent discrepancy: the late
 fraction ranges from 0% with every driver visible to values inside the observed interval at 30%
-off-panel under one rule, so no robust fold-gap follows; cases with no visible trunk driver stay at
-or below 1.6% against 5 of 47 real no-driver cases.
+off-panel under one rule, so no robust fold-gap follows; the estimated rate of cases with no detected
+trunk driver is 1.55% at 30% off-panel (bootstrap 1.43-1.68%), against 5 of 47 real no-driver cases.
 
 ## 7. Positive predictive value of sweeps
 
