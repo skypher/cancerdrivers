@@ -50,8 +50,11 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    smallest fitness that could sweep from birth, about 0.13 per year, whatever its true value. In
    the published model the conditioned increments sit at the input scales $a_k=s_1r^{k-1}$, so its
    agreement with Fig. 4c reproduces the assumed $r=2.5$ (§3b, theory note §5).
+   Limit of this test: all 400 simulated founders had swept, against 11 of 42 real ones. It shows
+   the mechanism and applies to the real swept founders. It does not measure how much of the
+   real Fig. 4c ladder is artefact.
 7. **The model cannot produce late evolution, by a factor of about $4\times10^5$** (theory note §6).
-8. **The PPV decline with age is mostly the 85-year horizon** of the simulation (§4 below).
+8. **The PPV decline with age stands.** The 85-year cut-off is a crude proxy for death from other causes; with explicit competing mortality the PPVs are close to the published ones (§4 below). An earlier draft of this note called the decline an artefact of the cut-off; that was wrong.
 
 Details follow.
 
@@ -94,7 +97,11 @@ Design (`analysis/sim2refit.py`, `analysis/simfit_eval.py`): the 928 AML cases o
 run; 8 annual samples at ages dx-8, ..., dx-1; read depth 1500; alt reads binomial on the true
 VAF; variants with true VAF $\ge0.001$ at some sample are included, observations with fewer than
 3 alt reads are censored. The estimator is the maximum-likelihood fit of §2c, given the true
-clone tree of the detected clones, which favours the estimator relative to the real analysis.
+clone tree of the detected clones. That helps the estimator. The case mix does not: in 95% of
+these simulated cases the founder had swept before the first sample, against 11 of 42 real cases
+(earliest clone's variant at VAF > 0.4 in the first sample). The pooled numbers below therefore
+measure mainly the failure on swept founders. Results for the stratum that dominates the real data
+(founder not swept) are in §2b2.
 
 Results (`runs/simfit/eval.txt`):
 - In 874 of 923 cases the first driver of the AML lineage had VAF > 0.4 at the first sample: it
@@ -113,7 +120,21 @@ Results (`runs/simfit/eval.txt`):
   fluctuate about 2.5 times more (in variance) than the model plus binomial sequencing implies.
 
 Caveats: the clean MLE differs from the authors' penalised fit; the real design has fewer samples
-(median 5), an inferred tree and missing drivers. Each of these makes recovery harder, not easier.
+(median 5), an inferred tree and missing drivers. Each of these makes recovery harder. The case mix
+(95% swept founders, against 26% in the real data) makes the pooled simulation numbers worse than
+what the real cases would show; see §2b2.
+
+### 2b2. Matched stratum: founders not swept at the first sample
+
+RESULT_MATCHED
+
+### 2b3. A mismatch between the model and the data
+
+In the published model 95% of AML founders have swept (VAF > 0.4) by eight years before
+diagnosis; the paper itself reports that about 99% of simulated AMLs had a full sweep more than
+5 years before diagnosis. In the real data the earliest clone had swept by the first sample in 11
+of 42 cases, and the paper counts sweeps in "at least a third" of the 47. The model produces early
+sweeps far more often than the data show.
 
 ### 2c. Confidence intervals on the real data
 
@@ -193,9 +214,11 @@ cannot distinguish $r=2.5$ from $r=1$ without a correction for this bias. In the
   (female cumulative risk to 85 is lower).
 - Fig. 5f counts any later myeloid leukaemia (ICD-10 C92, which includes CML) and hotspot sweeps
   that include JAK2 V617F; the Discussion reads it as AML risk.
-- The PPVs of Fig. 5e depend on the simulation horizon (AML before 85). Following the same
-  simulated lives to 100 raises the PPV at 70 from 21% to 62% and at 60 from 46% to 80% (theory
-  note §7). The decline with age in the main text is mostly this cut-off.
+- The PPVs of Fig. 5e count AML before 85 in a model without other causes of death. Following the
+  same simulated lives to 100 raises the PPV at 70 from 21% to 62%, but that is the figure for a
+  woman who cannot die of anything else. With competing mortality (Gompertz, life expectancy 16.5
+  years at 70) the PPVs are 81%, 64%, 44%, 28% at 40-70, close to the published 89%, 72%, 46%, 21%
+  (theory note §7). The cut-off is a crude but reasonable proxy; the decline with age stands.
 
 ## Files and reproduction
 

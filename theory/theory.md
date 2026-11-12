@@ -265,9 +265,14 @@ lives are identical up to 85 because each life has its own random stream). PPV o
 | 60 | 553/1204 = 46% | 962/1204 = 80% |
 | 70 | 733/3422 = 21% | 2117/3422 = 62% |
 
-Most of the decline with age is the horizon. A person meeting the criterion at 70 usually
-progresses, but after 85. In the model the predictive value is high at every age. The published
-numbers are tied to the 85-year cut-off, not to competing mortality.
+Without death from other causes, a person meeting the criterion at 70 usually progresses, but
+after 85. The model has no competing mortality, so the 85-year cut-off acts as a crude stand-in
+for it. Weighting each simulated AML by the probability of surviving other causes until
+diagnosis (Gompertz mortality $\mu(x)=Ae^{Bx}$, $A$ set so that life expectancy at 70 is 16.5
+years, roughly UK women; `analysis/ppv_mort.py`) gives PPVs of 81%, 64%, 44%, 28% at 40, 50, 60,
+70 for $B=0.1$ (78-83%, 61-67%, 43-46%, 28% for $B=0.085$-$0.115$). These are close to the
+published 85-year figures. The decline with age is real once competing mortality is included;
+the cut-off is a reasonable proxy for it, slightly too generous before 60 and too strict at 70.
 
 ## Files
 

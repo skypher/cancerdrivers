@@ -5,10 +5,12 @@ Design: annual samples at ages dx-NS, ..., dx-1 (NS = 8 by default); VAF of a mu
 0.5 * (cells of clones carrying it) / (all cells); alt reads ~ Binomial(depth, VAF); a variant is
 'detected' if its true VAF >= 0.001 at some sample; an observation with fewer than 3 alt reads is
 written as undetected (censored, as refit treats it).  The clone structure given to the estimator
-is the true tree of the detected clones (best case for the estimator).
+is the true tree of the detected clones (this helps the estimator; the case mix may not: under the
+published model about 95% of AML founders have swept before the first sample, against 11 of 42 real
+cases, so use --notswept for the stratum that dominates the real data).
 Also writes truth.tsv: person, clone name, nmut, true occurrence time, true fitness, on-AML-trunk.
 
-Usage: python3 -u sim2refit.py <cases.bin> <outdir> [--samples NS] [--depth D] [--seed S] [--max M]
+Usage: python3 -u sim2refit.py <cases.bin> <outdir> [--samples NS] [--depth D] [--seed S] [--max M] [--notswept]
 """
 import sys, os, struct
 if len(sys.argv) < 3 or sys.argv[1] in ('-h', '--help'):
@@ -20,6 +22,7 @@ NS = int(args[args.index('--samples') + 1]) if '--samples' in args else 8
 DEPTH = int(args[args.index('--depth') + 1]) if '--depth' in args else 1500
 SEED = int(args[args.index('--seed') + 1]) if '--seed' in args else 1
 MAXC = int(args[args.index('--max') + 1]) if '--max' in args else 10**9
+NOTSWEPT = '--notswept' in args   # keep only cases whose AML founder has VAF <= 0.4 at the first sample
 rng = np.random.default_rng(SEED)
 os.makedirs(out, exist_ok=True)
 b = open(src, 'rb').read()
@@ -54,6 +57,10 @@ for ci in range(nc):
     # lineage VAF of each mutation
     allm = sorted({m for c in cl for m in c['muts']})
     vaf = {m: 0.5 * sum(c['traj'][idx] for c in cl if m in c['muts']) / pop for m in allm}
+    if NOTSWEPT:
+        founder = [c for c in cl if c['aml']][0]['muts'][0]
+        if vaf[founder][0] > 0.4:
+            continue
     det = [m for m in allm if np.max(vaf[m]) >= 0.001]
     clones = [c for c in cl if c['nmut'] >= 1 and c['muts'][-1] in det]
     if not clones:
