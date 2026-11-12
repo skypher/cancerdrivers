@@ -5,3 +5,7 @@ __pycache__/
 sources/code/
 sources/nature/MOESM1.pdf
 sources/nature/MOESM4.pdf
+# not redistributable (kept outside the repo)
+sources/refs/watson2020/watson2020_science.pdf
+sources/refs/watson2020/sci.txt
+sources/refs/leesix_mitchell/PMC6163040.*
