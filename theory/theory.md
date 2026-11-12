@@ -269,7 +269,7 @@ chains first moments, so it is an order-of-magnitude estimate, not an upper boun
 
 *Statistical statement* (no approximation): the simulation gives 0 late cases among 928 AML cases
 (published: 0 of 943). The exact 95% upper bound on the model's late fraction is 0.40% of AML cases
-(two-sided Clopper-Pearson; 0 of 200,200 lives: below $1.8\times10^{-5}$ per life). The observed
+(two-sided Clopper-Pearson; 0 of 200,200 lives: about $1.84\times10^{-5}$ per life). The observed
 fraction is 10/47, two-sided 95% interval 10.7%-35.7%. The separate endpoints differ by about
 27-fold (26.98). A jointly calibrated conservative statement (Bonferroni, each interval at
 97.5%: model upper 0.47%, observed lower 9.6%) gives a ratio of at least 20 with 95% confidence.

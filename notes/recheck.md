@@ -28,8 +28,8 @@ Companion: `theory/theory.md` (propositions referred to below as Prop. n).
    correction for the measured overdispersion (Pearson dispersion 3.1), have median width 51 years,
    against 7 years for the published ranges; 144 of 156 case clones are wider. These intervals are
    themselves approximate: on simulated data with known truth their fitness intervals cover the
-   true fitness for 68% of single-driver clones and 91-97% of later ones, below the nominal 95%
-   (§2c). Read as intervals for the true founding time, a different estimand from the fitted
+   true fitness for only 68% of single-driver clones (nominal 95%), and for 93%, 91% and 97% of
+   2-, 3- and 4-driver clones (§2c). Read as intervals for the true founding time, a different estimand from the fitted
    $t_e$, they cover 52-86%; that is a diagnostic of using them for that purpose, not a coverage
    audit of $t_e$.
 4. **The "first driver by age 20 in two thirds of cases" statement is not supported case by
