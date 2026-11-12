@@ -206,9 +206,14 @@ sweeps far more often than the data show.
 `sim/refit.cpp` re-implements the core of the paper's model: Methods eqs. 1-2; the VAF weights of
 the v16 `likelihood_clones` in its branch order (a clone containing JAK2 V617F takes the JAK2
 branch, with JAK2 weight 1 only alongside chr9p CN-LOH, and never the chr4q/TET2 branch; otherwise
-chr4q CN-LOH gives weight 1 to TET2 variants; mCAs weight 1; others 1/2); the v16 filter that only
-observations with $0<\text{freq}<$ `Upper_freq` enter (0.4 for C92_034, 1 otherwise); and a binomial
-likelihood on read counts. The Jander code review (2026-11-12) found the earlier weight rule out of
+chr4q CN-LOH gives weight 1 to TET2 variants; mCAs weight 1; others 1/2); the v16 `Upper_freq`
+selection (0.4 for C92_034, 1 otherwise), implemented as excluding detected observations with
+alt/depth (or mCA fraction) at or above `Upper_freq`; and a binomial likelihood on read counts.
+This is not a literal copy of v16's condition $0<\text{freq}<$ `Upper_freq` on the raw VAF field
+(refit does not exclude zero values and filters on alt/depth), but on the public inputs the two
+select the same observations: there are no detected rows with zero alternate reads and no row where
+the alt/depth decision differs from the VAF-field decision, including C92_034 (independent audit by
+yang2, 2026-11-12). The Jander code review (2026-11-12) found the earlier weight rule out of
 branch order; no real clone contains both JAK2 V617F and chr4q CN-LOH, so that change alters no
 fit, whereas adding the omitted `Upper_freq` filter changes C92_034.
 
@@ -252,9 +257,10 @@ Results (`runs/refit/full5/eval.txt`, 42 cases, 33 controls, 222 clones; repaire
 - Flat ridges: rerunning the fit (repaired code, new random restarts) moved the point estimates of
   16 persons other than C92_034 while their maximum log-likelihood agreed with the previous run to
   three decimals (two others improved by 0.07 and 0.89, where the old exponent cap had been
-  active). Example: C92_011's fitness 7.5 to 1.5 per year at identical likelihood. Along these
-  directions the likelihood is exactly flat, so the point estimate is wherever the optimiser
-  stops; only the intervals are meaningful.
+  active). Example: C92_011's fitness 7.5 to 1.5 per year at a likelihood that agrees to 0.001.
+  The likelihood is numerically indistinguishable at that precision between such end points (not
+  shown to be exactly flat, nor flat along the whole path between them), so the point estimate is
+  largely wherever the optimiser stops; the intervals are the meaningful summary.
 - Published values lie inside the quasi intervals for 151/156 ages and 137/156 fitnesses. The
   point estimates are compatible with the data; their stated precision is not.
 - In 15 of 42 cases the published parameters are worse than the maximum-likelihood fit by more
