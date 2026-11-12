@@ -10,8 +10,13 @@ This script applies the real observation process to simulated AML cases:
     midpoint of the sample's timing group in UKCTOCS_samples_processed_minimal_information.csv);
   * detection: a trunk mutation is detected at a sample if its lineage VAF >= threshold;
   * panel: each trunk driver is off-panel (never detectable) independently with probability p;
-  * rule: late if no detectable trunk mutation is detected in any sample, or the first detection is
-    at a sample taken <= 2 years before diagnosis.
+  * rule: late if the selected lineage is not detected in any sample, or its first detection is at a
+    sample taken <= 2 years before diagnosis AND some earlier sample (> 2 yr) did not detect it.
+    Rule A selects the first visible trunk driver's lineage, rule B the second visible one. These are
+    sensitivity scenarios, not the paper's classifier (which is not specified as an algorithm).
+Intervals: case-level bootstrap over the stored simulated AML histories (each case's late
+probability averaged over its schedule/panel draws), i.e. for a population of AML histories from the
+model, not Clopper-Pearson on reused draws.
 Usage: python3 -u late_obs.py <cases.bin> <Data_files dir> [draws per case] [comma-separated off-panel probabilities]"""
 import sys, struct, csv, os
 if len(sys.argv) < 3 or sys.argv[1] in ('-h', '--help'):
@@ -67,34 +72,46 @@ print(f"simulated AML cases: {len(cases)}")
 def ci(k, n):
     return (beta.ppf(0.025, k, n - k + 1) if k > 0 else 0.0, beta.ppf(0.975, k + 1, n - k) if k < n else 1.0)
 lo0, hi0 = ci(10, 47); print(f"observed: 10/47 late = 21.3% [{100*lo0:.1f}-{100*hi0:.1f}]")
-# Rules (both require an earlier negative sample for a 'late detection', as the authors evidently did:
-# real cases C92_065 and C92_066, sampled only in the last 2 years, were not called late):
+# Rules (both require an earlier negative sample for a 'late detection'):
 #  A: the putative pre-leukaemic clone is the lineage of the first visible trunk driver;
-#  B: it is the lineage of the second visible trunk driver (an earlier visible driver counts as
-#     clonal haematopoiesis, as for real case C92_016, listed 'linear/late').
-# late = no detection of that lineage in any sample, or its first detection is <= 2 yr before
-# diagnosis and some earlier sample (> 2 yr) did not detect it.
-for rule in ('A', 'B'):
-    for p in PS:
-        thr = 0.001
-        late = tot = nodet = 0
-        for dx, V in cases:
-            for _ in range(R):
-                s = S[rng.integers(len(S))]
-                ages = dx - s
-                ok = ages >= 0
-                ss = s[ok]
-                idx = np.clip(np.round(ages[ok] / dt).astype(int), 0, T - 1)
-                vis = np.where(rng.random(4) >= p)[0]
-                k = 0 if rule == 'A' else 1
-                tot += 1
+#  B: it is the lineage of the second visible trunk driver.
+# Also counted, for comparison with the paper's 'no pathogenic driver detected at all': no visible
+# trunk driver detected in any sample (off-trunk clones are not in this file, so this is an upper
+# bound on the true no-driver rate).
+def boot(xs, B=4000):
+    xs = np.asarray(xs); n = len(xs)
+    m = np.array([xs[rng.integers(n, size=n)].mean() for _ in range(B)])
+    return np.quantile(m, 0.025), np.quantile(m, 0.975)
+for p in PS:
+    thr = 0.001
+    case_late = {'A': [], 'B': []}; case_none = []; case_selmiss = {'A': [], 'B': []}
+    for dx, V in cases:
+        cnt = {'A': 0, 'B': 0}; sm = {'A': 0, 'B': 0}; none = 0
+        for _ in range(R):
+            s = S[rng.integers(len(S))]
+            ages = dx - s
+            ok = ages >= 0
+            ss = s[ok]
+            idx = np.clip(np.round(ages[ok] / dt).astype(int), 0, T - 1)
+            vis = np.where(rng.random(4) >= p)[0]
+            detv = [(V[v][idx] >= thr) for v in vis]
+            if not any(d.any() for d in detv):
+                none += 1
+            for rule, k in (('A', 0), ('B', 1)):
                 if len(vis) <= k:
-                    late += 1; nodet += 1; continue
-                det = V[vis[k]][idx] >= thr
+                    cnt[rule] += 1; sm[rule] += 1; continue
+                det = detv[k]
                 if not det.any():
-                    late += 1; nodet += 1
+                    cnt[rule] += 1; sm[rule] += 1
                 elif ss[det].max() <= 2.0 and (ss > 2.0).any():
-                    late += 1
-        lo, hi = ci(late, tot)
-        print(f"[P(>=1 of 4 trunk drivers off-panel) = {1-(1-p)**4:.2f}] rule {rule}, off-panel prob {p:.2f}: late {late}/{tot} = {100*late/tot:.2f}% [{100*lo:.2f}-{100*hi:.2f}] "
-              f"(of which no detection: {100*nodet/tot:.2f}%)")
+                    cnt[rule] += 1
+        for rule in 'AB':
+            case_late[rule].append(cnt[rule] / R); case_selmiss[rule].append(sm[rule] / R)
+        case_none.append(none / R)
+    lo, hi = boot(case_none)
+    print(f"[P(>=1 of 4 trunk drivers off-panel) = {1-(1-p)**4:.3f}] off-panel prob {p:.4f}: "
+          f"no visible trunk driver detected at all {100*np.mean(case_none):.2f}% [{100*lo:.2f}-{100*hi:.2f}]")
+    for rule in 'AB':
+        lo, hi = boot(case_late[rule])
+        print(f"    rule {rule}: late {100*np.mean(case_late[rule]):.2f}% [{100*lo:.2f}-{100*hi:.2f}] "
+              f"(selected lineage absent or undetected: {100*np.mean(case_selmiss[rule]):.2f}%)")

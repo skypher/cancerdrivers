@@ -1,0 +1,18 @@
+real schedules: 47 cases, 245 samples; median samples per case 5; last sample > 2 yr before diagnosis in 20 of 47 cases
+simulated AML cases: 928
+observed: 10/47 late = 21.3% [10.7-35.7]
+[P(>=1 of 4 trunk drivers off-panel) = 0.000] off-panel prob 0.0000: no visible trunk driver detected at all 0.00% [0.00-0.00]
+    rule A: late 0.00% [0.00-0.00] (selected lineage absent or undetected: 0.00%)
+    rule B: late 0.00% [0.00-0.00] (selected lineage absent or undetected: 0.00%)
+[P(>=1 of 4 trunk drivers off-panel) = 0.264] off-panel prob 0.0737: no visible trunk driver detected at all 0.02% [0.01-0.04]
+    rule A: late 0.03% [0.01-0.05] (selected lineage absent or undetected: 0.02%)
+    rule B: late 1.03% [0.92-1.14] (selected lineage absent or undetected: 0.72%)
+[P(>=1 of 4 trunk drivers off-panel) = 0.404] off-panel prob 0.1215: no visible trunk driver detected at all 0.11% [0.08-0.14]
+    rule A: late 0.15% [0.11-0.19] (selected lineage absent or undetected: 0.11%)
+    rule B: late 2.92% [2.73-3.11] (selected lineage absent or undetected: 2.00%)
+[P(>=1 of 4 trunk drivers off-panel) = 0.557] off-panel prob 0.1843: no visible trunk driver detected at all 0.30% [0.25-0.36]
+    rule A: late 0.43% [0.36-0.50] (selected lineage absent or undetected: 0.30%)
+    rule B: late 6.49% [6.21-6.78] (selected lineage absent or undetected: 4.77%)
+[P(>=1 of 4 trunk drivers off-panel) = 0.760] off-panel prob 0.3000: no visible trunk driver detected at all 1.55% [1.43-1.68]
+    rule A: late 2.04% [1.90-2.19] (selected lineage absent or undetected: 1.55%)
+    rule B: late 16.47% [16.00-16.93] (selected lineage absent or undetected: 13.20%)

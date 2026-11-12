@@ -75,22 +75,21 @@ job_f9cc4981, gpt-6-pro); verdicts noted per item.
    founders' fitted median was 0.23 against 0.18 true. In the simulation the geometric escalation is
    imposed by the input distributions (scales $s_1r^{k-1}$), so the model's agreement with Fig. 4c
    reflects that assumption.
-7. **Late evolution: a gap remains under comparable classification, but it is far smaller than first
-   stated** (Pro: holds with qualification; observation-matched check added 2026-11-12, §2e). Against
-   the simulation's own classifier (complete lineage trajectories) the model gives 0 late cases in
-   928, about 27 times below the observed 10/47 (21%, 95% interval 10.7-35.7%). That comparison is not
-   like for like. Applying the real observation process to the simulated cases (each case sampled on
-   a real case's schedule, detection at VAF 0.1%, the paper's rule: no detection, or first detection
-   within 2 years after an earlier negative sample) gives 0 late cases with a complete panel:
-   sampling and detection limits alone do not create late cases. Drivers outside the panel do. With
-   the off-panel rate calibrated to the real data (12-15% of drivers, matching the 40-48% of cases in
-   which the authors inferred a missing driver or found none), the model gives 0.15-0.23% late cases
-   if the pre-leukaemic clone is the first driver's lineage, or 2.6-4.2% under the authors' apparent
-   rule that an earlier clone can be background (their case C92_016, listed "linear/late", was
-   detected 6 years before diagnosis). The gap is then roughly 3- to 8-fold under the authors' rule,
-   not 27-fold. It disappears only if about 30% of drivers are off-panel, which would imply about 70%
-   of cases with a missing driver against 40% observed. Excluding C92_016 the observed fraction is
-   9/47 (19%, 9.1-33.3%).
+7. **Late evolution: observation-model sensitivity reduces the apparent discrepancy; a remaining gap
+   depends on clone-selection and missing-driver assumptions** (Pro: holds with qualification;
+   sensitivity analysis added 2026-11-12, §2e, reviewed by yang2 with fixes applied). Against the
+   simulation's own classifier (complete lineage trajectories) the model gives 0 late cases in 928,
+   about 27 times below the observed 10/47 (21%, 95% interval 10.7-35.7%); that comparison is not like
+   for like. In a sensitivity analysis that samples the simulated cases on real schedules, detects at
+   VAF 0.1% and treats some drivers as off-panel, the late fraction depends strongly on which lineage
+   is taken as the pre-leukaemic clone (two artificial rules, neither established as the paper's
+   classifier) and on the off-panel probability $p$: from 0% at $p=0$ to 0.15% (rule A) or 2.9%
+   (rule B) at an illustrative $p\approx0.12$, and 2.0% or 16.5% at $p=0.3$ (the latter inside the
+   observed interval). The scenarios do not identify a robust fold-gap. One comparison does not depend
+   on the choice of rule: cases with no visible trunk driver detected at all are at most 1.6% in the
+   model even at $p=0.3$, against 5 of 47 real cases (3.5-23.1%) with no panel driver. Under these
+   assumptions (independent misses, four trunk drivers) that points to a subset of AMLs with largely
+   undetectable routes, which is the paper's own suggestion and lies outside its published model.
 8. **The PPV decline with age stands** (Pro: holds). With explicit competing mortality the PPVs are
    close to the published ones (§4); an earlier draft calling the decline an artefact of the age-85
    cut-off was wrong. This shows robustness within the model and scenarios, not calibration of
@@ -327,36 +326,48 @@ pre-leukaemic clone, with an earlier DNMT3A clone treated as background). The tw
 only in the final 2 years (C92_065, C92_066) were not called late, so a late detection evidently
 requires an earlier negative sample.
 
-Simulated version (`analysis/late_obs.py`, `runs/late_obs2.txt`, `runs/late_obs3.txt`): each of the
-928 simulated AML cases receives the sample schedule of a randomly drawn real case (40 draws per
-case; exact months where the public calls file has them, else timing-group midpoints); a trunk
-mutation is detected when its lineage VAF is at least 0.001; each trunk driver is off-panel
-independently with probability $p$; late = no detection, or first detection within 2 years after an
-earlier negative sample. Rule A takes the first visible trunk driver's lineage as the pre-leukaemic
-clone, rule B the second (an earlier visible driver treated as background, as for C92_016).
+Sensitivity analysis (`analysis/late_obs.py`; outputs committed in `notes/late_obs_results.txt`):
+each of the 928 stored simulated AML cases receives the sample schedule of a randomly drawn real case
+(40 draws per case; exact months where the public calls file has them, else timing-group midpoints);
+a trunk mutation is detected when its lineage VAF is at least 0.001 (nearest 0.1-yr grid point); each
+trunk driver is off-panel independently with probability $p$; late = the selected lineage is not
+detected, or its first detection is within 2 years of diagnosis after an earlier (> 2 yr) negative
+sample. Rule A selects the first visible trunk driver's lineage, rule B the second. These are
+artificial sensitivity rules: the paper's Methods define late by the putative pre-leukaemic clone's
+late detectability or no panel driver at all, without an algorithm, and the cases above (C92_016,
+C92_065/066; the Fig. 2i legend singles out a clone first seen in the final year) suggest case-specific
+judgement rather than either rule. Intervals are case-level bootstrap intervals over the 928 stored
+histories (case late probabilities averaged over draws).
 
-| off-panel probability $p$ | P(at least 1 of 4 drivers off-panel) | late, rule A | late, rule B |
-|---|---|---|---|
-| 0 | 0 | 0.00% | 0.00% |
-| 0.12 | 0.40 | 0.15% | 2.56% (no detection 1.80%) |
-| 0.15 | 0.48 | 0.23% | 4.17% (no detection 2.98%) |
-| 0.3 | 0.76 | 2.0% | 16.5% (no detection 13.0%) |
-| 0.5 | 0.94 | 9.8% | 43% |
+| off-panel $p$ | P(at least 1 of 4 off-panel) | no visible trunk driver detected | late, rule A | late, rule B |
+|---|---|---|---|---|
+| 0 | 0 | 0% | 0% | 0% |
+| 0.074 | 0.26 | 0.02% | 0.03% | 1.0% [0.9-1.1] |
+| 0.121 | 0.40 | 0.11% | 0.15% | 2.9% [2.7-3.1] |
+| 0.184 | 0.56 | 0.30% | 0.43% | 6.5% [6.2-6.8] |
+| 0.3 | 0.76 | 1.6% [1.4-1.7] | 2.0% | 16.5% [16.0-16.9] |
 
-Observed: 10/47 = 21.3% (10.7-35.7%); no detection 5/47 (3.5-23.1%); late detection after a
-negative sample 4/47 (2.4-20.4%). The real data show a missing driver (inferred X/Y/Z, 14 cases) or no
-driver (5 cases) in 19 of 47 cases (40%), which calibrates $p\approx0.12$-$0.15$ under the
-independence assumption.
+Observed: 10/47 late = 21.3% (10.7-35.7%); 9/47 = 19% (9.1-33.3%) without the mixed case C92_016;
+no panel driver at all 5/47 = 10.6% (3.5-23.1%).
 
-Conclusions. (i) The simulation's own classifier and the paper's real-data rule are not comparable,
-so the 27-fold figure overstates the gap. (ii) Sparse sampling and the detection limit do not by
-themselves create late cases in the model. (iii) At the calibrated off-panel rate the model's late
-fraction is 0.15-4.2% depending on the definition, still below the observed interval; matching it
-would need about 30% of drivers off-panel, inconsistent with the 40% of cases showing a missing
-driver. (iv) Independent per-driver panel misses are a crude model: a subset of AMLs with largely
-invisible routes (the paper's own suggestion: off-panel drivers or single ultra-rare events) lies
-outside the published model and could close the gap. Limits: depth noise and calling thresholds are
-not modelled beyond the 0.1% VAF cut; draws reuse the 928 cases, so the effective sample is 928.
+On $p$: if each case had exactly four relevant drivers, missed independently with the same
+probability, and the 19 of 47 real cases with an inferred missing driver (X/Y/Z; 14 cases) or no
+driver (5 cases) were exactly the cases with at least one off-panel trunk driver, then
+$p=1-(28/47)^{1/4}=0.121$, with binomial range 0.074-0.184. Those assumptions are strong (an inferred
+missing driver is not a verified off-panel mutation, the number of drivers varies, inference is
+imperfect), so this is an illustrative range, not a calibration.
+
+What the analysis shows. (i) The simulation's own classifier and the paper's real-data
+classification are not comparable, so the 27-fold figure overstates the gap. (ii) For these 928
+stored cases and the sampled schedules, sparse sampling and the detection limit gave no late cases
+when every driver was visible. (iii) With off-panel drivers the late fraction ranges from well below
+to within the observed interval, depending on the clone-selection rule and $p$; no robust fold-gap
+follows. (iv) The fraction of cases with no visible trunk driver at all stays at or below 1.6% up to
+$p=0.3$, against 5 of 47 real no-driver cases; since off-trunk clones are not counted here, this
+model figure is an upper bound on its no-driver rate. Under independent misses this suggests a subset
+of AMLs with largely undetectable routes (the paper's own explanation), outside the published model.
+Limits: depth noise and calling thresholds are not modelled beyond the 0.1% cut; the inputs and
+classifier have not been independently audited.
 
 ## 3. Founders swept before sampling
 

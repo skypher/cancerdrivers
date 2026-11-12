@@ -321,11 +321,11 @@ confidence bound on the ratio of late fractions (the Bonferroni construction at 
 classified comparably. Comparability needs an observation model: the simulation classifies on the
 complete first-driver lineage trajectory and its first-ever threshold crossing, the real data on
 sparse samples and a finite panel, where an unobserved initiating driver can produce an apparent
-late pattern without a separate biological mechanism. An observation-matched check (`notes/recheck.md`
-§2e: real sampling schedules, 0.1% VAF detection, the paper's rule) gives 0 late cases with a
-complete panel, and 0.15-4.2% (depending on the definition of the pre-leukaemic clone) with 12-15%
-of drivers off-panel, the rate the real data suggest; the gap to the observed 21% is then roughly
-3- to 8-fold under the authors' apparent rule, not 27-fold.
+late pattern without a separate biological mechanism. A sensitivity analysis (`notes/recheck.md` §2e: real sampling schedules, 0.1% VAF detection,
+off-panel drivers, two artificial clone-selection rules) reduces the apparent discrepancy: the late
+fraction ranges from 0% with every driver visible to values inside the observed interval at 30%
+off-panel under one rule, so no robust fold-gap follows; cases with no visible trunk driver stay at
+or below 1.6% against 5 of 47 real no-driver cases.
 
 ## 7. Positive predictive value of sweeps
 
